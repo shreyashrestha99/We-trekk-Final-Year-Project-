@@ -6,12 +6,15 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
-
+  const navigate = useNavigate();
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .post("http://localhost:5000/api/login", { email, password, role })
-      .then((result) => console.log(result))
+      .post("http://localhost:5000/api/auth/login", { email, password, role })
+      .then((result) => {
+        console.log(result);
+        navigate("/dashboard");
+      })
       .catch((err) => console.log(err));
   };
 

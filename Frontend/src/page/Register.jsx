@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function Register() {
@@ -8,12 +8,28 @@ function Register() {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
 
+  const navigate = useNavigate(); // for redirect
+
   const handleSubmit = (e) => {
     e.preventDefault();
+
     axios
-      .post("http://localhost:5000/api/register", { name, email, password, role })
-      .then((result) => console.log(result))
-      .catch((err) => console.log(err));
+      .post("http://localhost:5000/api/auth/register", {
+        name,
+        email,
+        password,
+        role,
+      })
+      .then((result) => {
+        console.log(result);
+
+        // redirect to login page after success
+        navigate("/login");
+      })
+      .catch((err) => {
+        console.log(err);
+        alert("Registration failed");
+      });
   };
 
   return (
