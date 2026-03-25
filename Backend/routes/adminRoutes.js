@@ -4,6 +4,7 @@ import Guide from "../models/Guide.js";
 import Vendor from "../models/Vendor.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { authorize } from "../middleware/roleMiddleware.js";
+import Booking from "../models/Booking.js";
 
 const router = express.Router();
 
@@ -67,6 +68,31 @@ router.put("/verify/:userId", protect, authorize("Admin"), async (req, res) => {
     }
 
     res.json({ message: "User verified successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get all disputes
+router.get("/disputes", protect, authorize("Admin"), async (req, res) => {
+  try {
+    const disputes = await Booking.find({ dispute_status: { $ne: "None" } }).populate("trekker_id").populate("schedule_id");
+    res.json(disputes);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Resolve dispute
+router.put("/disputes/:bookingId", protect, authorize("Admin"), async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.bookingId);
+    if (!booking) return res.status(404).json({ message: "Booking not found" });
+
+    booking.dispute_status = "Resolved";
+    await booking.save();
+    
+    res.json({ message: "Dispute resolved", booking });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
