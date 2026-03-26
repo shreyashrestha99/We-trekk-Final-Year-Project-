@@ -1,5 +1,6 @@
 import Group from "../models/Group.js";
 import GroupMember from "../models/GroupMember.js";
+import mongoose from "mongoose";
 
 // GET /api/groups
 export const getGroups = async (req, res) => {
@@ -64,5 +65,44 @@ export const approveMember = async (req, res) => {
     res.json(member);
   } catch (error) {
     res.status(400).json({ message: error.message });
+  }
+};
+
+// GET /api/groups/vendor
+export const getVendorGroups = async (req, res) => {
+  try {
+    const groups = await Group.find({ created_by: req.user.id }).populate("schedule_id");
+    
+    // Fetch members for each group to show join requests
+    const groupsWithMembers = await Promise.all(groups.map(async (group) => {
+      const members = await GroupMember.find({ group_id: group._id }).populate("trekker_id", "trekker_name");
+      return { ...group._doc, members };
+    }));
+
+    res.json(groupsWithMembers);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// GET /api/groups/guide
+export const getGuideGroupMembers = async (req, res) => {
+  try {
+    // Find all schedules assigned to this guide
+    const schedules = await mongoose.model("TrekSchedule").find({ guide_id: req.user.id });
+    const scheduleIds = schedules.map(s => s._id);
+
+    // Find groups linked to these schedules
+    const groups = await Group.find({ schedule_id: { $in: scheduleIds } });
+    const groupIds = groups.map(g => g._id);
+
+    // Find confirmed members in these groups
+    const members = await GroupMember.find({ group_id: { $in: groupIds }, joined_status: "Confirmed" })
+      .populate("trekker_id", "trekker_name")
+      .populate("group_id", "group_name");
+
+    res.json(members);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

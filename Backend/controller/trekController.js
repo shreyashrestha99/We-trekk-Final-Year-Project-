@@ -3,7 +3,17 @@ import Trek from "../models/Trek.js";
 // GET /api/treks
 export const getTreks = async (req, res) => {
   try {
-    const treks = await Trek.find({});
+    const { difficulty, maxBudget } = req.query;
+    let filter = {};
+
+    if (difficulty) {
+      filter.difficulty_level = difficulty;
+    }
+    if (maxBudget) {
+      filter.cost = { $lte: Number(maxBudget) };
+    }
+
+    const treks = await Trek.find(filter);
     res.json(treks);
   } catch (error) {
     res.status(500).json({ message: error.message });

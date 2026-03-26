@@ -36,3 +36,13 @@ export const updateSeats = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+// GET /api/schedules/guide
+export const getGuideSchedules = async (req, res) => {
+  try {
+    const schedules = await TrekSchedule.find({ guide_id: req.user.id }).populate("trek_id").populate("vendor_id");
+    res.json(schedules);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

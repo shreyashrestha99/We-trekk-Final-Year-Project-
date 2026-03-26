@@ -1,4 +1,5 @@
 import Booking from "../models/Booking.js";
+import mongoose from "mongoose";
 
 // POST /api/bookings
 export const createBooking = async (req, res) => {
@@ -33,6 +34,22 @@ export const cancelBooking = async (req, res) => {
     booking.booking_status = "Cancelled";
     await booking.save();
     res.json(booking);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// GET /api/bookings/vendor
+export const getVendorBookings = async (req, res) => {
+  try {
+    const schedules = await mongoose.model("TrekSchedule").find({ vendor_id: req.user.id });
+    const scheduleIds = schedules.map(s => s._id);
+
+    const bookings = await Booking.find({ schedule_id: { $in: scheduleIds } })
+      .populate("trekker_id", "trekker_name")
+      .populate("schedule_id");
+
+    res.json(bookings);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

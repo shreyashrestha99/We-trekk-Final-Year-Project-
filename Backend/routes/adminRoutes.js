@@ -5,6 +5,7 @@ import Vendor from "../models/Vendor.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { authorize } from "../middleware/roleMiddleware.js";
 import Booking from "../models/Booking.js";
+import mongoose from "mongoose";
 
 const router = express.Router();
 
@@ -93,6 +94,25 @@ router.put("/disputes/:bookingId", protect, authorize("Admin"), async (req, res)
     await booking.save();
     
     res.json({ message: "Dispute resolved", booking });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get platform stats
+router.get("/stats", protect, authorize("Admin"), async (req, res) => {
+  try {
+    const usersCount = await User.countDocuments();
+    const treksCount = await mongoose.model("Trek").countDocuments();
+    const bookingsCount = await Booking.countDocuments();
+    const disputesCount = await Booking.countDocuments({ dispute_status: { $ne: "None" } });
+
+    res.json({
+      users: usersCount,
+      treks: treksCount,
+      bookings: bookingsCount,
+      disputes: disputesCount
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
