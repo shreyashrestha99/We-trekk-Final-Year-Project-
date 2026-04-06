@@ -8,6 +8,7 @@ import Login from "./page/Login";
 import Explore from "./page/Explore";
 import About from "./page/About";
 import ContactUs from "./page/ContactUs";
+import TrekDetails from "./page/TrekDetails";
 
 // TREKKER
 import TrekkerDashboard from "./page/Trekker/TrekkerDashboard";
@@ -18,10 +19,22 @@ import TrekkerProfile from "./page/Trekker/TrekkerProfile";
 
 // VENDOR
 import VendorDashboard from "./page/Vendor/VendorDashboard";
-import ManageTreks from "./page/Vendor/ManageTreks";
+import CreateRide from "./page/Vendor/CreateRide";
+import ManageRides from "./page/Vendor/ManageRides";
+import ManageBookings from "./page/Vendor/ManageBookings";
+import VendorEarnings from "./page/Vendor/VendorEarnings";
+import VendorNotifications from "./page/Vendor/VendorNotifications";
+import VendorProfile from "./page/Vendor/VendorProfile";
 
 // GUIDE
 import GuideDashboard from "./page/Guide/GuideDashboard";
+import CreateTrek from "./page/Guide/CreateTrek";
+import TrekSchedules from "./page/Guide/TrekSchedules";
+import MyTreks from "./page/Guide/MyTreks";
+import TrekBookings from "./page/Guide/TrekBookings";
+import GuideEarnings from "./page/Guide/GuideEarnings";
+import GuideNotifications from "./page/Guide/GuideNotifications";
+import GuideProfile from "./page/Guide/GuideProfile";
 
 // ADMIN
 import AdminDashboard from "./page/Admin/AdminDashboard";
@@ -39,6 +52,7 @@ function App() {
       <Route path="/explore" element={<Explore />} />
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<ContactUs />} />
+      <Route path="/trek/:id" element={<TrekDetails />} />
 
       {/* TREKKER ROUTES */}
       <Route path="/trekker/dashboard" element={
@@ -73,9 +87,34 @@ function App() {
           <VendorDashboard />
         </ProtectedRoute>
       } />
-      <Route path="/vendor/treks" element={
+      <Route path="/vendor/create-ride" element={
         <ProtectedRoute allowedRoles={["LocalVendor"]}>
-          <ManageTreks />
+          <CreateRide />
+        </ProtectedRoute>
+      } />
+      <Route path="/vendor/rides" element={
+        <ProtectedRoute allowedRoles={["LocalVendor"]}>
+          <ManageRides />
+        </ProtectedRoute>
+      } />
+      <Route path="/vendor/bookings" element={
+        <ProtectedRoute allowedRoles={["LocalVendor"]}>
+          <ManageBookings />
+        </ProtectedRoute>
+      } />
+      <Route path="/vendor/earnings" element={
+        <ProtectedRoute allowedRoles={["LocalVendor"]}>
+          <VendorEarnings />
+        </ProtectedRoute>
+      } />
+      <Route path="/vendor/notifications" element={
+        <ProtectedRoute allowedRoles={["LocalVendor"]}>
+          <VendorNotifications />
+        </ProtectedRoute>
+      } />
+      <Route path="/vendor/profile" element={
+        <ProtectedRoute allowedRoles={["LocalVendor"]}>
+          <VendorProfile />
         </ProtectedRoute>
       } />
 
@@ -83,6 +122,41 @@ function App() {
       <Route path="/guide/dashboard" element={
         <ProtectedRoute allowedRoles={["Guide"]}>
           <GuideDashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/guide/create-trek" element={
+        <ProtectedRoute allowedRoles={["Guide"]}>
+          <CreateTrek />
+        </ProtectedRoute>
+      } />
+      <Route path="/guide/schedules" element={
+        <ProtectedRoute allowedRoles={["Guide"]}>
+          <TrekSchedules />
+        </ProtectedRoute>
+      } />
+      <Route path="/guide/treks" element={
+        <ProtectedRoute allowedRoles={["Guide"]}>
+          <MyTreks />
+        </ProtectedRoute>
+      } />
+      <Route path="/guide/bookings" element={
+        <ProtectedRoute allowedRoles={["Guide"]}>
+          <TrekBookings />
+        </ProtectedRoute>
+      } />
+      <Route path="/guide/earnings" element={
+        <ProtectedRoute allowedRoles={["Guide"]}>
+          <GuideEarnings />
+        </ProtectedRoute>
+      } />
+      <Route path="/guide/notifications" element={
+        <ProtectedRoute allowedRoles={["Guide"]}>
+          <GuideNotifications />
+        </ProtectedRoute>
+      } />
+      <Route path="/guide/profile" element={
+        <ProtectedRoute allowedRoles={["Guide"]}>
+          <GuideProfile />
         </ProtectedRoute>
       } />
 

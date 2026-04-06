@@ -6,14 +6,14 @@ const trekScheduleSchema = new mongoose.Schema({
     ref: "Trek",
     required: true
   },
-  vendor_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Vendor",
-    required: true
-  },
   guide_id: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Guide"
+    ref: "User",
+    required: true
+  },
+  date: {
+    type: Date,
+    required: true
   },
   start_date: {
     type: Date,

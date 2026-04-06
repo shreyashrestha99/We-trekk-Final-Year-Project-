@@ -4,6 +4,7 @@ import DashboardLayout from "../../components/DashboardLayout";
 const menuItems = [
   { label: "Dashboard", icon: "🏠", path: "/vendor/dashboard" },
   { label: "My Treks", icon: "🏔️", path: "/vendor/treks" },
+  { label: "My Rides", icon: "🚙", path: "/vendor/rides" },
   { label: "My Schedules", icon: "📅", path: "/vendor/schedules" },
   { label: "My Groups", icon: "👥", path: "/vendor/groups" },
   { label: "Bookings", icon: "📋", path: "/vendor/bookings" },

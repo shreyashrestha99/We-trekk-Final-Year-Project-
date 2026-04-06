@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
 
 const team = [
   { name: "Shreya Shrestha", role: "Full Stack Developer", initial: "SS" },
@@ -46,50 +47,7 @@ function About() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#0A0F1C" }}>
 
-      {/* HEADER */}
-      <header style={{ backgroundColor: "#0A0F1C", borderBottom: "1px solid #1F2937" }}>
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div
-            className="text-2xl font-black cursor-pointer"
-            style={{ color: "#AAFF00" }}
-            onClick={() => navigate("/")}
-          >
-            WeTrekk
-          </div>
-          <nav className="hidden md:flex space-x-6 text-sm">
-            {[
-              { label: "Home", path: "/" },
-              { label: "Explore", path: "/explore" },
-              { label: "Contact Us", path: "/contact" },
-              { label: "About Us", path: "/about" }
-            ].map((item) => (
-              <button
-                key={item.label}
-                onClick={() => navigate(item.path)}
-                style={{ color: item.path === "/about" ? "#AAFF00" : "#9CA3AF" }}
-              >
-                {item.label}
-              </button>
-            ))}
-          </nav>
-          <div className="space-x-3">
-            <button
-              onClick={() => navigate("/login")}
-              className="px-4 py-2 text-sm rounded-md"
-              style={{ border: "1px solid #AAFF00", color: "#AAFF00" }}
-            >
-              Login
-            </button>
-            <button
-              onClick={() => navigate("/register")}
-              className="px-4 py-2 text-sm rounded-md font-semibold"
-              style={{ backgroundColor: "#AAFF00", color: "#0A0F1C" }}
-            >
-              Join Now
-            </button>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* HERO */}
       <section

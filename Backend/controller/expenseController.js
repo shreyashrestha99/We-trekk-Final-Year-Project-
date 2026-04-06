@@ -28,7 +28,8 @@ export const getMyExpenses = async (req, res) => {
 export const generateReport = async (req, res) => {
   try {
     const expenses = await Expense.find({ trekker_id: req.user.id });
-    // In a real scenario, convert expenses to PDF. Returning JSON for now.
+    
+    // TODO: Implement PDF generation
     res.json({ message: "PDF Report generated", expenses });
   } catch (error) {
     res.status(500).json({ message: error.message });

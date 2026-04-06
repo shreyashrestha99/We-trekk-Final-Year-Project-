@@ -5,6 +5,15 @@ const trekSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  guide_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+  },
+  location: {
+    type: String,
+    required: true
+  },
   difficulty_level: {
     type: String,
     enum: ["Easy", "Moderate", "Hard", "Extreme"],

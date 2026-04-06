@@ -1,15 +1,23 @@
 import mongoose from "mongoose";
 
 const bookingSchema = new mongoose.Schema({
-  trekker_id: {
+  user_id: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Trekker",
+    ref: "User",
     required: true
   },
-  schedule_id: {
+  trek_schedule_id: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "TrekSchedule",
-    required: true
+    ref: "TrekSchedule"
+  },
+  ride_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Ride"
+  },
+  seats: {
+    type: Number,
+    required: true,
+    default: 1
   },
   booking_date: {
     type: Date,

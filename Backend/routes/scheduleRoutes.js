@@ -5,13 +5,13 @@ import { authorize } from "../middleware/roleMiddleware.js";
 
 const router = express.Router();
 
+router.get("/guide", protect, authorize("Guide"), getGuideSchedules);
+
 router.route("/")
   .get(getSchedules)
-  .post(protect, authorize("LocalVendor"), createSchedule);
+  .post(protect, authorize("Guide"), createSchedule);
 
 router.route("/:id/seats")
-  .put(protect, authorize("LocalVendor", "Admin"), updateSeats);
-
-router.get("/guide/my-schedules", protect, authorize("Guide"), getGuideSchedules);
+  .put(protect, authorize("Guide", "Admin"), updateSeats);
 
 export default router;

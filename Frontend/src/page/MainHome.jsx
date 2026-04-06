@@ -1,59 +1,46 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import API from "../utils/axios";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 function MainHome() {
   const navigate = useNavigate();
+  const [dbTreks, setDbTreks] = useState([]);
+  const [publicRides, setPublicRides] = useState([]);
+
+  useEffect(() => {
+    API.get("/api/treks")
+      .then(res => setDbTreks(res.data))
+      .catch(err => console.error(err));
+
+    API.get("/api/rides")
+      .then(res => setPublicRides(res.data))
+      .catch(err => console.error(err));
+  }, []);
+
+  const handleBookRide = async (rideId) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please login as a Trekker to book a ride.");
+      navigate("/login");
+      return;
+    }
+    
+    try {
+      await API.post(`/api/bookings/ride/${rideId}`, { seats: 1 });
+      alert("Ride booked successfully!");
+      const res = await API.get("/api/rides");
+      setPublicRides(res.data);
+    } catch (error) {
+       alert(error.response?.data?.message || "Failed to book ride (Only Trekkers can book)");
+    }
+  };
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#0A0F1C" }}>
 
-      {/* HEADER */}
-      <header style={{ backgroundColor: "#0A0F1C", borderBottom: "1px solid #1F2937" }}>
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div
-            className="text-2xl font-bold cursor-pointer"
-            style={{ color: "#AAFF00" }}
-            onClick={() => navigate("/")}
-          >
-            WeTrekk
-          </div>
-
-          <nav className="hidden md:flex space-x-8 text-sm">
-            {["Home", "Explore", "Contact Us", "About Us"].map((item) => (
-              <button
-                key={item}
-                onClick={() => navigate(`/${item.toLowerCase().replace(" ", "")}`)}
-                className="transition-colors"
-                style={{ color: "#9CA3AF" }}
-                onMouseEnter={e => e.target.style.color = "#AAFF00"}
-                onMouseLeave={e => e.target.style.color = "#9CA3AF"}
-              >
-                {item}
-              </button>
-            ))}
-          </nav>
-
-          <div className="space-x-3">
-            <button
-              onClick={() => navigate("/login")}
-              className="px-4 py-2 text-sm rounded-md transition-colors"
-              style={{ border: "1px solid #AAFF00", color: "#AAFF00" }}
-              onMouseEnter={e => e.currentTarget.style.backgroundColor = "#AAFF00" + "20"}
-              onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}
-            >
-              Login
-            </button>
-            <button
-              onClick={() => navigate("/register")}
-              className="px-4 py-2 text-sm rounded-md font-semibold transition-colors"
-              style={{ backgroundColor: "#AAFF00", color: "#0A0F1C" }}
-              onMouseEnter={e => e.currentTarget.style.backgroundColor = "#88CC00"}
-              onMouseLeave={e => e.currentTarget.style.backgroundColor = "#AAFF00"}
-            >
-              Join Now
-            </button>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* HERO */}
       <section
@@ -126,32 +113,32 @@ function MainHome() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
-          {[
+          {(dbTreks.length > 0 ? dbTreks.slice(0, 3) : [
             {
-              name: "Annapurna Circuit",
-              tag: "Adventure",
-              price: "$800",
-              days: "15 Days",
-              img: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=800",
-              slug: "annapurna"
+              trek_name: "Annapurna Circuit",
+              difficulty_level: "Hard",
+              cost: 800,
+              duration_days: 15,
+              image_url: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=800",
+              _id: "annapurna"
             },
             {
-              name: "Everest Base Camp",
-              tag: "Challenging",
-              price: "$1200",
-              days: "14 Days",
-              img: "https://images.unsplash.com/photo-1517824806704-9040b037703b?q=80&w=800",
-              slug: "everest"
+              trek_name: "Everest Base Camp",
+              difficulty_level: "Hard",
+              cost: 1200,
+              duration_days: 14,
+              image_url: "https://images.unsplash.com/photo-1517824806704-9040b037703b?q=80&w=800",
+              _id: "everest"
             },
             {
-              name: "Langtang Valley",
-              tag: "Moderate",
-              price: "$600",
-              days: "10 Days",
-              img: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=800",
-              slug: "langtang"
+              trek_name: "Langtang Valley",
+              difficulty_level: "Moderate",
+              cost: 600,
+              duration_days: 10,
+              image_url: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=800",
+              _id: "langtang"
             }
-          ].map((trek) => (
+          ]).map((trek) => (
             <div
               key={trek.name}
               className="rounded-xl overflow-hidden transition-transform hover:-translate-y-1"
@@ -159,29 +146,29 @@ function MainHome() {
             >
               <div className="relative">
                 <img
-                  src={trek.img}
+                  src={trek.image_url || "https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=800"}
                   className="w-full h-48 object-cover"
-                  alt={trek.name}
+                  alt={trek.trek_name}
                 />
                 <span
                   className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold"
                   style={{ backgroundColor: "#AAFF00", color: "#0A0F1C" }}
                 >
-                  {trek.tag}
+                  {trek.difficulty_level || "Adventure"}
                 </span>
               </div>
               <div className="p-5">
-                <h3 className="font-bold text-white text-lg">{trek.name}</h3>
+                <h3 className="font-bold text-white text-lg">{trek.trek_name}</h3>
                 <div className="flex justify-between items-center mt-2">
                   <span className="text-sm" style={{ color: "#9CA3AF" }}>
-                    {trek.days}
+                    {trek.duration_days} Days
                   </span>
                   <span className="font-bold" style={{ color: "#AAFF00" }}>
-                    {trek.price}
+                    Rs. {trek.cost}
                   </span>
                 </div>
                 <button
-                  onClick={() => navigate(`/trek/${trek.slug}`)}
+                  onClick={() => navigate(`/trek/${trek._id}`)}
                   className="mt-4 w-full py-2 rounded-md font-semibold text-sm transition-colors"
                   style={{ backgroundColor: "#AAFF00", color: "#0A0F1C" }}
                   onMouseEnter={e => e.currentTarget.style.backgroundColor = "#88CC00"}
@@ -193,6 +180,56 @@ function MainHome() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* PUBLIC RIDES SECTION */}
+      <section className="max-w-7xl mx-auto px-6 py-16">
+        <div className="mb-8">
+          <p className="text-sm font-semibold tracking-widest uppercase mb-2"
+            style={{ color: "#AAFF00" }}>
+            Hassle-free traveling
+          </p>
+          <h2 className="text-3xl font-bold text-white">Shared Rides</h2>
+        </div>
+
+        {publicRides.length === 0 ? (
+          <div className="p-8 text-center rounded-xl" style={{ backgroundColor: "#1A2235", border: "1px solid #1F2937" }}>
+             <p className="text-gray-400">No shared rides available right now. Check back later!</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-3 gap-6">
+            {publicRides.map((ride) => (
+              <div key={ride._id} className="p-6 rounded-xl relative" style={{ backgroundColor: "#1A2235", border: "1px solid #1F2937" }}>
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="font-bold text-xl text-white">{ride.destination}</h3>
+                    <p className="text-sm text-gray-400">{ride.vehicle_type} by {ride.vendor_id?.name || "Vendor"}</p>
+                  </div>
+                  <span className="text-[#AAFF00] font-bold">Rs. {ride.price}</span>
+                </div>
+                
+                <div className="space-y-2 mb-6">
+                  <div className="flex items-center text-sm text-gray-300">
+                    <span className="w-6 text-center">📅</span> {new Date(ride.departure_time).toLocaleString()}
+                  </div>
+                  <div className="flex items-center text-sm text-gray-300">
+                    <span className="w-6 text-center">💺</span> {ride.available_seats} Seats Available
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => handleBookRide(ride._id)}
+                  className="w-full py-2 rounded-md font-bold text-sm transition-colors"
+                  style={{ backgroundColor: "#AAFF00", color: "#0A0F1C" }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = "#88CC00"}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = "#AAFF00"}
+                >
+                  Book 1 Seat
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* WHY WETREKK */}
@@ -231,12 +268,35 @@ function MainHome() {
 
       {/* MORE ADVENTURES */}
       <section className="max-w-7xl mx-auto px-6 py-16">
-        <div className="mb-8">
-          <p className="text-sm font-semibold tracking-widest uppercase mb-2"
-            style={{ color: "#AAFF00" }}>
-            More Routes
-          </p>
-          <h2 className="text-3xl font-bold text-white">More Adventures</h2>
+        <div className="flex justify-between items-end mb-8">
+          <div>
+            <p className="text-sm font-semibold tracking-widest uppercase mb-2"
+              style={{ color: "#AAFF00" }}>
+              More Routes
+            </p>
+            <h2 className="text-3xl font-bold text-white">More Adventures</h2>
+          </div>
+          <div className="flex space-x-4 items-center">
+            <div className="flex space-x-2">
+              <button className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-600 hover:border-[#AAFF00] hover:text-[#AAFF00] transition-colors text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path fillRule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z" />
+                </svg>
+              </button>
+              <button className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-600 hover:border-[#AAFF00] hover:text-[#AAFF00] transition-colors text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path fillRule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
+                </svg>
+              </button>
+            </div>
+            <button
+              onClick={() => navigate("/explore")}
+              className="px-4 py-2 rounded-md text-sm font-semibold"
+              style={{ border: "1px solid #AAFF00", color: "#AAFF00" }}
+            >
+              See More →
+            </button>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
@@ -291,59 +351,7 @@ function MainHome() {
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer style={{ backgroundColor: "#0A0F1C", borderTop: "1px solid #1F2937" }}>
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <h3 className="text-xl font-black mb-3" style={{ color: "#AAFF00" }}>
-                WeTrekk
-              </h3>
-              <p className="text-sm" style={{ color: "#9CA3AF" }}>
-                Nepal's trusted platform for trek coordination
-              </p>
-            </div>
-            <div>
-              <h4 className="font-bold text-white mb-3">Quick Links</h4>
-              {["Explore Treks", "Register", "Login"].map(link => (
-                <p key={link} className="text-sm mb-2 cursor-pointer"
-                  style={{ color: "#9CA3AF" }}
-                  onClick={() => navigate(`/${link.toLowerCase().replace(" ", "")}`)}
-                >
-                  {link}
-                </p>
-              ))}
-            </div>
-            <div>
-              <h4 className="font-bold text-white mb-3">Legal</h4>
-              {["Privacy Policy", "Terms of Service", "Contact Us"].map(link => (
-                <p key={link} className="text-sm mb-2" style={{ color: "#9CA3AF" }}>
-                  {link}
-                </p>
-              ))}
-            </div>
-            <div>
-              <h4 className="font-bold text-white mb-3">Follow Us</h4>
-              <div className="flex space-x-3">
-                {["FB", "IG", "TW", "YT"].map(social => (
-                  <div
-                    key={social}
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold cursor-pointer"
-                    style={{ backgroundColor: "#1A2235", color: "#AAFF00", border: "1px solid #AAFF00" }}
-                  >
-                    {social}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-          <div style={{ borderTop: "1px solid #1F2937" }} className="pt-4 text-center">
-            <p className="text-sm" style={{ color: "#6B7280" }}>
-              © 2025 WeTrekk. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
