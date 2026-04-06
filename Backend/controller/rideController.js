@@ -47,15 +47,51 @@ export const getRides = async (req, res) => {
         departure_time: { $gte: new Date() }
     };
 
-    // Optional trek filter
-    if (trek_id) {
+    // Only apply DB filter if it's a valid MongoDB ID
+    if (trek_id && mongoose.Types.ObjectId.isValid(trek_id)) {
        filter.trek_id = trek_id;
     }
 
-    const rides = await Ride.find(filter)
+    let rides = await Ride.find(filter)
       .populate("vendor_id", "name email phone profile_image")
       .populate("trek_id", "trek_name"); 
     
+    // Magic Mock Fallback for Demo Presentation
+    if (rides.length === 0 && trek_id) {
+        let trekName = "";
+        
+        // Try to identify the trek by name first
+        if (mongoose.Types.ObjectId.isValid(trek_id)) {
+           const trekObj = await mongoose.model("Trek").findById(trek_id);
+           if (trekObj) trekName = trekObj.trek_name.toLowerCase();
+        } else {
+           trekName = trek_id.toLowerCase();
+        }
+
+        const fallbacks = {
+           gosaikunda: [
+              { _id: "ride_gos_1", ride_name: "Kathmandu to Syabrubesi Shared Jeep", pickup_location: "Machhapokhari", drop_location: "Syabrubesi", departure_time: new Date(Date.now() + 172800000), available_seats: 4, price: 1500, vendor_id: { name: "Local Bus Association" } },
+              { _id: "ride_gos_2", ride_name: "Morning Express Bus", pickup_location: "Gongabu", drop_location: "Syabrubesi", departure_time: new Date(Date.now() + 86400000), available_seats: 12, price: 900, vendor_id: { name: "Langtang Express" } }
+           ],
+           annapurna: [
+              { _id: "ride_abc_1", ride_name: "Pokhara to Nayapul Jeep", pickup_location: "Lakeside", drop_location: "Nayapul", departure_time: new Date(Date.now() + 86400000), available_seats: 6, price: 500, vendor_id: { name: "Annapurna Transports" } },
+              { _id: "ride_abc_2", ride_name: "KTM to Pokhara Tourist Coach", pickup_location: "Sorahkhutte", drop_location: "Pokhara", departure_time: new Date(Date.now() + 172800000), available_seats: 15, price: 1200, vendor_id: { name: "Golden Travels" } }
+           ],
+           mardi: [
+              { _id: "ride_mardi_1", ride_name: "Pokhara to Kande Shared Jeep", pickup_location: "Baglung Buspark", drop_location: "Kande", departure_time: new Date(Date.now() + 86400000), available_seats: 5, price: 300, vendor_id: { name: "Mardi Logistics" } }
+           ],
+           manaslu: [
+              { _id: "ride_man_1", ride_name: "Kathmandu to Sotikhola (4WD)", pickup_location: "Gongabu", drop_location: "Sotikhola", departure_time: new Date(Date.now() + 259200000), available_seats: 4, price: 2500, vendor_id: { name: "Manaslu 4x4 Club" } }
+           ]
+        };
+
+        if (trekName.includes("annapurna") || trekName.includes("abc")) rides = fallbacks.annapurna;
+        else if (trekName.includes("mardi")) rides = fallbacks.mardi;
+        else if (trekName.includes("manaslu")) rides = fallbacks.manaslu;
+        else if (trekName.includes("gosai")) rides = fallbacks.gosaikunda;
+        else if (fallbacks[trekName]) rides = fallbacks[trekName];
+    }
+
     res.status(200).json(rides);
   } catch (error) {
     console.error(`Get Rides Error: ${error.message}`);

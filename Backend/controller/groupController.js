@@ -5,7 +5,43 @@ import mongoose from "mongoose";
 // GET /api/groups
 export const getGroups = async (req, res) => {
   try {
-    const groups = await Group.find({ status: "Open" }).populate("schedule_id").populate("created_by");
+    let groups = await Group.find({ status: "Open" })
+      .populate("schedule_id")
+      .populate("created_by");
+
+    // Magic Mock Fallback for Demo Presentation
+    if (groups.length === 0) {
+       groups = [
+          {
+             _id: "group_demo_1",
+             group_name: "The Solo Summit Club",
+             max_members: 6,
+             current_members: 3,
+             status: "Open",
+             meeting_point: "Kathmandu Guest House",
+             schedule_id: { _id: "sch_demo_1", trek_name: "General Trek" }
+          },
+          {
+             _id: "group_demo_2",
+             group_name: "Annapurna Photo Squad",
+             max_members: 10,
+             current_members: 8,
+             status: "Open",
+             meeting_point: "Lakeside Hall",
+             schedule_id: { _id: "sch_demo_2", trek_name: "Annapurna Base Camp" }
+          },
+          {
+             _id: "group_demo_3",
+             group_name: "Weekend Langtang Warriors",
+             max_members: 5,
+             current_members: 1,
+             status: "Open",
+             meeting_point: "Gongabu Bus Park",
+             schedule_id: { _id: "sch_demo_3", trek_name: "Langtang Valley" }
+          }
+       ];
+    }
+
     res.json(groups);
   } catch (error) {
     res.status(500).json({ message: error.message });
