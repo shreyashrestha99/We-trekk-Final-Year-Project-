@@ -72,24 +72,24 @@ function GuideProfile() {
               </div>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8 border-t border-gray-800 pt-8">
+            <div className="grid md:grid-cols-2 gap-8 border-t border-[#AAFF00]/20 pt-8">
               <div className="space-y-4">
-                <div className="flex justify-between items-center py-2 border-b border-gray-800/30">
+                <div className="flex justify-between items-center py-2 border-b border-[#AAFF00]/10">
                   <span className="text-xs font-bold text-gray-500 uppercase">Phone Number</span>
                   <span className="text-sm font-black text-white">{displayUser?.phone || "Not Set"}</span>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b border-gray-800/30">
+                <div className="flex justify-between items-center py-2 border-b border-[#AAFF00]/10">
                   <span className="text-xs font-bold text-gray-500 uppercase">Experience</span>
                   <span className="text-sm font-black text-white">{guide?.experience_years || 0} Years</span>
                 </div>
               </div>
 
               <div className="space-y-4">
-                <div className="flex justify-between items-center py-2 border-b border-gray-800/30">
+                <div className="flex justify-between items-center py-2 border-b border-[#AAFF00]/10">
                   <span className="text-xs font-bold text-gray-500 uppercase">License No.</span>
                   <span className="text-sm font-black text-white">{guide?.license_no || "Pending"}</span>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b border-gray-800/30">
+                <div className="flex justify-between items-center py-2 border-b border-[#AAFF00]/10">
                   <span className="text-xs font-bold text-gray-500 uppercase">Verification</span>
                   <span className={`text-[0.65rem] font-black uppercase px-2 py-1 rounded bg-[#AAFF00]/10 ${guide?.is_verified ? "text-[#AAFF00]" : "text-gray-500"}`}>
                     {guide?.is_verified ? "✓ Verified Account" : "Standard"}
