@@ -300,23 +300,28 @@ function MainHome() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
-          {(dbTreks.length > 3 ? dbTreks.slice(3, 6) : [
-            { trek_name: "Gosaikunda Trek", duration_days: 7, _id: "gosaikunda" },
-            { trek_name: "Mardi Himal", duration_days: 5, _id: "mardi" },
-            { trek_name: "Manaslu Circuit", duration_days: 14, _id: "manaslu" }
-          ]).map((trek) => (
+          {[
+            { trek_name: "Gosaikunda Trek", duration_days: 7, _id: "gosaikunda", image_url: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=800" },
+            { trek_name: "Mardi Himal", duration_days: 5, _id: "mardi", image_url: "https://images.unsplash.com/photo-1517824806704-9040b037703b?q=80&w=800" },
+            { trek_name: "Manaslu Circuit", duration_days: 14, _id: "manaslu", image_url: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=800" }
+          ].map((trek) => (
             <div
               key={trek._id}
               className="p-6 rounded-xl flex justify-between items-center"
               style={{ backgroundColor: "#1A2235", border: "1px solid #1F2937" }}
             >
-              <div>
-                <h3 className="font-bold text-white">{trek.trek_name}</h3>
-                <span className="text-sm" style={{ color: "#AAFF00" }}>{trek.duration_days} Days</span>
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                  <img src={trek.image_url} alt={trek.trek_name} className="w-full h-full object-cover" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-white text-sm">{trek.trek_name}</h3>
+                  <span className="text-[0.7rem] font-bold" style={{ color: "#AAFF00" }}>{trek.duration_days} Days</span>
+                </div>
               </div>
               <button
                 onClick={() => navigate(`/trek/${trek._id}`)}
-                className="px-4 py-2 rounded-md text-sm font-semibold"
+                className="px-4 py-2 rounded-md text-sm font-semibold whitespace-nowrap"
                 style={{ backgroundColor: "#AAFF00", color: "#0A0F1C" }}
                 onMouseEnter={e => e.currentTarget.style.backgroundColor = "#88CC00"}
                 onMouseLeave={e => e.currentTarget.style.backgroundColor = "#AAFF00"}

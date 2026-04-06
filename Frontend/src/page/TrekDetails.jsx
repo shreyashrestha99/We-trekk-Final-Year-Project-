@@ -16,19 +16,23 @@ function TrekDetails() {
   const fetchDetails = async () => {
     setLoading(true);
     try {
-      // 1. Trek Details
+      // 1. Trek Details (Supports Slug or ID)
       const trekRes = await API.get(`/api/treks/${id}`);
-      setTrek(trekRes.data);
+      const realTrek = trekRes.data;
+      setTrek(realTrek);
+
+      // IMPORTANT: Use the REAL database _id for subsequent queries
+      const trekDbId = realTrek._id;
 
       // 2. Guide Schedules (Real-time Filter)
       const scheduleRes = await API.get("/api/schedules");
       const matchedSchedules = scheduleRes.data.filter(s => 
-        (s.trek_id?._id || s.trek_id) === id
+        (s.trek_id?._id || s.trek_id) === trekDbId
       );
       setSchedules(matchedSchedules);
 
       // 3. Vendor Rides (Using our new API filter)
-      const rideRes = await API.get(`/api/rides?trek_id=${id}`);
+      const rideRes = await API.get(`/api/rides?trek_id=${trekDbId}`);
       setRides(rideRes.data);
 
       // 4. Community Groups
@@ -40,7 +44,6 @@ function TrekDetails() {
 
     } catch (error) {
       console.error("Failed to load trek details", error);
-      // Fallback for demo if needed
     } finally {
       setLoading(false);
     }
