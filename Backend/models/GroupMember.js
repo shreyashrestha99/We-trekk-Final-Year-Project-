@@ -6,9 +6,9 @@ const groupMemberSchema = new mongoose.Schema({
     ref: "Group",
     required: true
   },
-  trekker_id: {
+  user_id: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Trekker",
+    ref: "User",
     required: true
   },
   needs_transport: {

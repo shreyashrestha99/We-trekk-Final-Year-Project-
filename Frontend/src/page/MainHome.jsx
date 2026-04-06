@@ -115,28 +115,28 @@ function MainHome() {
         <div className="grid md:grid-cols-3 gap-6">
           {(dbTreks.length > 0 ? dbTreks.slice(0, 3) : [
             {
-              trek_name: "Annapurna Circuit",
+              trek_name: "Annapurna Base Camp",
               difficulty_level: "Hard",
-              cost: 800,
-              duration_days: 15,
-              image_url: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=800",
+              cost: 15000,
+              duration_days: 14,
+              image_url: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=800",
               _id: "annapurna"
             },
             {
               trek_name: "Everest Base Camp",
               difficulty_level: "Hard",
-              cost: 1200,
-              duration_days: 14,
+              cost: 18000,
+              duration_days: 16,
               image_url: "https://images.unsplash.com/photo-1517824806704-9040b037703b?q=80&w=800",
               _id: "everest"
             },
             {
-              trek_name: "Langtang Valley",
+              trek_name: "Gosaikunda Trek",
               difficulty_level: "Moderate",
-              cost: 600,
-              duration_days: 10,
-              image_url: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=800",
-              _id: "langtang"
+              cost: 8000,
+              duration_days: 7,
+              image_url: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=800",
+              _id: "gosaikunda"
             }
           ]).map((trek) => (
             <div
@@ -146,7 +146,7 @@ function MainHome() {
             >
               <div className="relative">
                 <img
-                  src={trek.image_url || "https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=800"}
+                  src={trek.image_url ? `http://localhost:5000${trek.image_url}` : "https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=2000"} 
                   className="w-full h-48 object-cover"
                   alt={trek.trek_name}
                 />
@@ -300,22 +300,22 @@ function MainHome() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
-          {[
-            { name: "Gosaikunda Trek", days: "7 Days", slug: "gosaikunda" },
-            { name: "Mardi Himal", days: "5 Days", slug: "mardi" },
-            { name: "Manaslu Circuit", days: "14 Days", slug: "manaslu" }
-          ].map((trek) => (
+          {(dbTreks.length > 3 ? dbTreks.slice(3, 6) : [
+            { trek_name: "Gosaikunda Trek", duration_days: 7, _id: "gosaikunda" },
+            { trek_name: "Mardi Himal", duration_days: 5, _id: "mardi" },
+            { trek_name: "Manaslu Circuit", duration_days: 14, _id: "manaslu" }
+          ]).map((trek) => (
             <div
-              key={trek.name}
+              key={trek._id}
               className="p-6 rounded-xl flex justify-between items-center"
               style={{ backgroundColor: "#1A2235", border: "1px solid #1F2937" }}
             >
               <div>
-                <h3 className="font-bold text-white">{trek.name}</h3>
-                <span className="text-sm" style={{ color: "#AAFF00" }}>{trek.days}</span>
+                <h3 className="font-bold text-white">{trek.trek_name}</h3>
+                <span className="text-sm" style={{ color: "#AAFF00" }}>{trek.duration_days} Days</span>
               </div>
               <button
-                onClick={() => navigate(`/trek/${trek.slug}`)}
+                onClick={() => navigate(`/trek/${trek._id}`)}
                 className="px-4 py-2 rounded-md text-sm font-semibold"
                 style={{ backgroundColor: "#AAFF00", color: "#0A0F1C" }}
                 onMouseEnter={e => e.currentTarget.style.backgroundColor = "#88CC00"}

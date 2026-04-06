@@ -39,10 +39,22 @@ export const createRide = async (req, res) => {
 // GET /api/rides
 export const getRides = async (req, res) => {
   try {
-    const rides = await Ride.find({ 
+    const { trek_id } = req.query;
+    
+    // Base filter
+    const filter = { 
         available_seats: { $gt: 0 },
         departure_time: { $gte: new Date() }
-    }).populate("vendor_id", "name"); 
+    };
+
+    // Optional trek filter
+    if (trek_id) {
+       filter.trek_id = trek_id;
+    }
+
+    const rides = await Ride.find(filter)
+      .populate("vendor_id", "name email phone profile_image")
+      .populate("trek_id", "trek_name"); 
     
     res.status(200).json(rides);
   } catch (error) {

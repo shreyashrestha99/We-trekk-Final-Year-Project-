@@ -37,8 +37,27 @@ export const getGuideTreks = async (req, res) => {
 // GET /api/treks/:id
 export const getTrekById = async (req, res) => {
   try {
-    const trek = await Trek.findById(req.params.id);
-    if (!trek) return res.status(404).json({ message: "Trek not found" });
+    const { id } = req.params;
+    let trek;
+
+    // Check if ID is a valid MongoDB ObjectId
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      trek = await Trek.findById(id);
+    } else {
+      // If not an ObjectId, try searching by trek_name (slug capability)
+      trek = await Trek.findOne({ 
+        trek_name: { $regex: new RegExp(`^${id}$`, "i") } 
+      });
+
+      // Special case: handle slugs like 'gosaikunda' matches 'Gosaikunda Trek'
+      if (!trek) {
+        trek = await Trek.findOne({ 
+          trek_name: { $regex: new RegExp(id, "i") } 
+        });
+      }
+    }
+
+    if (!trek) return res.status(404).json({ message: "Trek not discovered in our database." });
     res.json(trek);
   } catch (error) {
     res.status(500).json({ message: error.message });

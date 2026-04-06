@@ -36,7 +36,7 @@ export const joinGroup = async (req, res) => {
 
     const member = new GroupMember({
       group_id: group._id,
-      trekker_id,
+      user_id: req.user.id,
       needs_transport,
       needs_accommodation,
       needs_guide
@@ -74,7 +74,7 @@ export const getVendorGroups = async (req, res) => {
     const groups = await Group.find({ created_by: req.user.id }).populate("schedule_id");
     
     const groupsWithMembers = await Promise.all(groups.map(async (group) => {
-      const members = await GroupMember.find({ group_id: group._id }).populate("trekker_id", "trekker_name");
+      const members = await GroupMember.find({ group_id: group._id }).populate("user_id", "name email");
       return { ...group._doc, members };
     }));
 
@@ -94,7 +94,7 @@ export const getGuideGroupMembers = async (req, res) => {
     const groupIds = groups.map(g => g._id);
 
     const members = await GroupMember.find({ group_id: { $in: groupIds }, joined_status: "Confirmed" })
-      .populate("trekker_id", "trekker_name")
+      .populate("user_id", "name email")
       .populate("group_id", "group_name");
 
     res.json(members);
