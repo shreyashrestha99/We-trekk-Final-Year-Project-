@@ -1,43 +1,116 @@
+import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import DashboardLayout from "../../components/DashboardLayout";
 import { guideMenuItems } from "./GuideDashboard";
+import API from "../../utils/axios";
+import EditProfileModal from "../../components/EditProfileModal";
 
 function GuideProfile() {
   const { user, defaultImg } = useAuth();
-  const profileImg = user?.profile_image || defaultImg;
+  const [profileData, setProfileData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const fetchProfile = async () => {
+    try {
+      const res = await API.get("/api/auth/profile");
+      setProfileData(res.data);
+    } catch (error) {
+      console.error("Failed to fetch profile", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const handleUpdate = () => {
+    fetchProfile();
+  };
+
+  if (loading) return <div className="p-8 text-[#AAFF00] font-black animate-pulse text-center mt-20">Syncing Identity...</div>;
+
+  const displayUser = profileData?.user || user;
+  const guide = profileData?.guide || {};
+  const profileImg = displayUser?.profile_image ? `http://localhost:5000${displayUser.profile_image}` : defaultImg;
 
   return (
     <DashboardLayout menuItems={guideMenuItems}>
-      <div className="mb-8">
-        <p className="text-sm font-semibold tracking-widest uppercase" style={{ color: "#AAFF00" }}>Identity</p>
-        <h1 className="text-3xl font-black text-white mt-1">Guide Profile</h1>
+      <div className="mb-6 flex justify-between items-center bg-[#1A2235]/50 p-6 rounded-2xl border border-gray-800">
+        <div>
+          <h1 className="text-2xl font-black text-white">Profile Overview</h1>
+          <p className="text-xs text-gray-400 mt-1">Manage your identity and professional credentials.</p>
+        </div>
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="px-5 py-3 bg-[#AAFF00] text-[#0A0F1C] font-black uppercase text-[0.65rem] tracking-widest rounded-lg hover:bg-white transition-all shadow-lg active:scale-95"
+        >
+          Edit Profile
+        </button>
       </div>
 
-      <div className="bg-[#1A2235] border border-gray-800 rounded-xl p-8 shadow-2xl max-w-2xl">
-        <div className="flex flex-col md:flex-row items-center gap-8 border-b border-gray-800 pb-8">
-          <div className="w-32 h-32 rounded-full border-4 border-[#AAFF00] overflow-hidden bg-[#0A0F1C] shadow-[0_0_20px_rgba(170,255,0,0.3)] shrink-0">
-             <img src={profileImg} alt="Profile" className="w-full h-full object-cover" />
-          </div>
-          <div className="text-center md:text-left">
-             <h2 className="text-3xl font-black text-white">{user?.name}</h2>
-             <p className="text-[#AAFF00] font-bold tracking-widest uppercase mt-1">{user?.role}</p>
-             <p className="text-gray-400 mt-2">{user?.email}</p>
-          </div>
-        </div>
-
-        <div className="pt-8 space-y-6">
-           <div>
-              <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">Phone Number</p>
-              <p className="text-lg font-bold text-white mt-1">{user?.phone || 'Not Provided'}</p>
-           </div>
-           <div>
-              <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">Account Status</p>
-              <div className="inline-block mt-2 px-4 py-2 bg-[#AAFF00]/10 border border-[#AAFF00]/30 rounded-lg">
-                 <p className="text-[#AAFF00] font-black uppercase tracking-widest text-sm">Active Guide</p>
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Main Simple Profile Card */}
+        <div className="bg-[#1A2235] border border-gray-800 rounded-2xl shadow-xl overflow-hidden">
+          {/* Cover/Header area (simple) */}
+          <div className="h-24 bg-gradient-to-r from-[#AAFF00]/10 to-transparent"></div>
+          
+          <div className="px-8 pb-8 -mt-12">
+            <div className="flex flex-col md:flex-row items-end gap-6 mb-8">
+              <div className="w-32 h-32 rounded-full border-4 border-[#1A2235] overflow-hidden bg-[#0A0F1C] shadow-xl relative z-10">
+                <img src={profileImg} alt="Profile" className="w-full h-full object-cover" />
               </div>
-           </div>
+              <div className="flex-grow pb-2">
+                <h2 className="text-3xl font-black text-white">{displayUser?.name}</h2>
+                <div className="flex items-center gap-3 mt-1">
+                  <span className="text-[#AAFF00] font-bold text-xs uppercase tracking-widest">{displayUser?.role}</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
+                  <span className="text-gray-400 text-xs">{displayUser?.email}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8 border-t border-gray-800 pt-8">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center py-2 border-b border-gray-800/30">
+                  <span className="text-xs font-bold text-gray-500 uppercase">Phone Number</span>
+                  <span className="text-sm font-black text-white">{displayUser?.phone || "Not Set"}</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-800/30">
+                  <span className="text-xs font-bold text-gray-500 uppercase">Experience</span>
+                  <span className="text-sm font-black text-white">{guide?.experience_years || 0} Years</span>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex justify-between items-center py-2 border-b border-gray-800/30">
+                  <span className="text-xs font-bold text-gray-500 uppercase">License No.</span>
+                  <span className="text-sm font-black text-white">{guide?.license_no || "Pending"}</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-800/30">
+                  <span className="text-xs font-bold text-gray-500 uppercase">Verification</span>
+                  <span className={`text-[0.65rem] font-black uppercase px-2 py-1 rounded bg-[#AAFF00]/10 ${guide?.is_verified ? "text-[#AAFF00]" : "text-gray-500"}`}>
+                    {guide?.is_verified ? "✓ Verified Account" : "Standard"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-10 p-5 bg-[#0A0F1C] rounded-xl border border-gray-800 text-xs text-gray-400 leading-relaxed italic">
+              Your biography and credentials help Trekkers build trust. Keep your license and experience accurate to increase your visibility on the platform.
+            </div>
+          </div>
         </div>
       </div>
+
+      <EditProfileModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        profileData={profileData} 
+        onUpdate={handleUpdate} 
+      />
     </DashboardLayout>
   );
 }

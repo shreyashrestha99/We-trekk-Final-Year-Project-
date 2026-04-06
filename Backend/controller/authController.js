@@ -88,12 +88,80 @@ export const login = async (req, res) => {
       user: {
         id: user._id,
         name: user.name,
-        role: user.role
+        role: user.role,
+        phone: user.phone || "",
+        profile_image: user.profile_image || ""
       }
     });
 
   } catch (error) {
     console.error(`Login error: ${error.message}`);
     res.status(500).json({ message: "Internal server error during login" });
+  }
+};
+
+// GET /api/auth/profile
+export const getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    let profileData = { user };
+
+    if (user.role === "Guide") {
+      profileData.guide = await Guide.findOne({ user_id: user._id });
+    } else if (user.role === "LocalVendor") {
+      profileData.vendor = await Vendor.findOne({ user_id: user._id });
+    } else if (user.role === "Trekker") {
+      profileData.trekker = await Trekker.findOne({ user_id: user._id });
+    }
+
+    res.json(profileData);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// PUT /api/auth/profile
+export const updateProfile = async (req, res) => {
+  try {
+    const { name, phone, experience_years, license_no, address, company_name } = req.body;
+    
+    // 1. Update Base User
+    const userUpdates = { name, phone };
+    if (req.file) {
+      userUpdates.profile_image = `/uploads/${req.file.filename}`;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.id,
+      { $set: userUpdates },
+      { new: true }
+    ).select("-password");
+
+    // 2. Update Role Specific Data
+    if (updatedUser.role === "Guide") {
+      await Guide.findOneAndUpdate(
+        { user_id: updatedUser._id },
+        { $set: { experience_years: Number(experience_years), license_no } },
+        { upsert: true }
+      );
+    } else if (updatedUser.role === "LocalVendor") {
+       await Vendor.findOneAndUpdate(
+         { user_id: updatedUser._id },
+         { $set: { company_name } },
+         { upsert: true }
+       );
+    } else if (updatedUser.role === "Trekker") {
+       await Trekker.findOneAndUpdate(
+         { user_id: updatedUser._id },
+         { $set: { address } },
+         { upsert: true }
+       );
+    }
+
+    res.json({ message: "Profile updated successfully!", user: updatedUser });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 };

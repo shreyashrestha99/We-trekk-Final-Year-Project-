@@ -18,6 +18,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ["Trekker", "Guide", "LocalVendor", "Admin"],
     default: "Trekker"
+  },
+  phone: {
+    type: String,
+    default: ""
+  },
+  profile_image: {
+    type: String,
+    default: ""
   }
 }, { timestamps: true });
 
