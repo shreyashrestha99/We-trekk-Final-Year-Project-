@@ -32,7 +32,7 @@ function GuideDashboard() {
     try {
       const [treksRes, schedulesRes, bookingsRes, earningsRes] = await Promise.all([
         API.get("/api/treks/guide"),
-        API.get("/api/trek-schedules/guide"),
+        API.get("/api/schedules/guide"),
         API.get("/api/bookings/guide"),
         API.get("/api/treks/earnings")
       ]);
