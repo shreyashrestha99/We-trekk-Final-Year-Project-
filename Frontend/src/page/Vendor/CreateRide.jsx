@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import DashboardLayout from "../../components/DashboardLayout";
 import { useAuth } from "../../context/AuthContext";
 import API from "../../utils/axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const menuItems = [
   { label: "Dashboard", icon: "🏠", path: "/vendor/dashboard" },
@@ -17,6 +17,8 @@ const menuItems = [
 function CreateRide() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const editRide = location.state?.editRide;
 
   const [formData, setFormData] = useState({
     ride_name: "",
@@ -25,24 +27,43 @@ function CreateRide() {
     departure_time: "",
     total_seats: "",
     price: "",
-    trek_id: ""
+    trek_id: "",
+    vehicle_type: "Jeep"
   });
 
   const [treks, setTreks] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Fetch available treks to link ride optionally
-    const fetchTreks = async () => {
-      try {
-        const res = await API.get("/api/treks");
-        setTreks(res.data);
-      } catch (error) {
-        console.error("Failed to load treks", error);
-      }
-    };
     fetchTreks();
-  }, []);
+    if (editRide) {
+      // Format date for datetime-local input (YYYY-MM-DDTHH:mm)
+      const date = new Date(editRide.departure_time);
+      const formattedDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
+        .toISOString()
+        .slice(0, 16);
+
+      setFormData({
+        ride_name: editRide.ride_name || "",
+        pickup_location: editRide.pickup_location || "",
+        drop_location: editRide.drop_location || "",
+        departure_time: formattedDate,
+        total_seats: editRide.total_seats || "",
+        price: editRide.price || "",
+        trek_id: editRide.trek_id?._id || editRide.trek_id || "",
+        vehicle_type: editRide.vehicle_type || "Jeep"
+      });
+    }
+  }, [editRide]);
+
+  const fetchTreks = async () => {
+    try {
+      const res = await API.get("/api/treks");
+      setTreks(res.data);
+    } catch (error) {
+      console.error("Failed to load treks", error);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -59,13 +80,18 @@ function CreateRide() {
         price: Number(formData.price)
       };
 
-      if (!payload.trek_id) delete payload.trek_id; // Remove empty trek_id
+      if (!payload.trek_id) delete payload.trek_id;
 
-      await API.post("/api/rides", payload);
-      alert("Ride created successfully!");
+      if (editRide) {
+         await API.put(`/api/rides/${editRide._id}`, payload);
+         alert("Ride updated successfully!");
+      } else {
+         await API.post("/api/rides", payload);
+         alert("Ride created successfully!");
+      }
       navigate("/vendor/rides");
     } catch (error) {
-      alert(error.response?.data?.message || "Failed to create ride");
+      alert(error.response?.data?.message || "Failed to save ride");
     } finally {
       setLoading(false);
     }
@@ -77,7 +103,9 @@ function CreateRide() {
         <p className="text-sm font-semibold tracking-widest uppercase" style={{ color: "#AAFF00" }}>
           Fleet Management
         </p>
-        <h1 className="text-3xl font-black text-white mt-1">Create New Ride</h1>
+        <h1 className="text-3xl font-black text-white mt-1">
+          {editRide ? "Edit Transportation" : "Create New Ride"}
+        </h1>
       </div>
 
       <div className="bg-[#1A2235] border border-gray-800 rounded-xl p-8 max-w-3xl">
@@ -190,10 +218,10 @@ function CreateRide() {
             <button 
               type="submit" 
               disabled={loading}
-              className="px-8 py-3 rounded-md font-bold text-[#0A0F1C] transition-colors"
+              className="px-8 py-3 rounded-md font-bold text-[#0A0F1C] transition-colors uppercase tracking-widest text-xs"
               style={{ backgroundColor: loading ? "#6B7280" : "#AAFF00" }}
             >
-              {loading ? "Creating..." : "Create Ride"}
+              {loading ? "Saving..." : (editRide ? "Update Ride" : "Create Ride")}
             </button>
           </div>
         </form>

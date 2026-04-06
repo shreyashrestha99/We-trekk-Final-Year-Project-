@@ -39,18 +39,24 @@ function Navbar() {
         </div>
 
         <nav className="hidden md:flex space-x-8 text-sm">
-          {["Home", "Explore", "Contact Us", "About Us"].map((item) => (
-            <button
-              key={item}
-              onClick={() => navigate(`/${item.toLowerCase().replace(" ", "")}`)}
-              className="transition-colors"
-              style={{ color: "#9CA3AF" }}
-              onMouseEnter={e => e.target.style.color = "#AAFF00"}
-              onMouseLeave={e => e.target.style.color = "#9CA3AF"}
-            >
-              {item}
-            </button>
-          ))}
+          {["Home", "Explore", "Contact Us", "About Us"].map((item) => {
+            const path = item === "Home" ? "/" 
+                       : item === "Explore" ? "/explore" 
+                       : item === "Contact Us" ? "/contact" 
+                       : "/about";
+            return (
+              <button
+                key={item}
+                onClick={() => navigate(path)}
+                className="transition-colors"
+                style={{ color: "#9CA3AF" }}
+                onMouseEnter={e => e.target.style.color = "#AAFF00"}
+                onMouseLeave={e => e.target.style.color = "#9CA3AF"}
+              >
+                {item}
+              </button>
+            );
+          })}
         </nav>
 
         <div className="flex items-center space-x-4">

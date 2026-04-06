@@ -113,72 +113,55 @@ function MainHome() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
-          {(dbTreks.length > 0 ? dbTreks.slice(0, 3) : [
-            {
-              trek_name: "Annapurna Base Camp",
-              difficulty_level: "Hard",
-              cost: 15000,
-              duration_days: 14,
-              image_url: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=800",
-              _id: "annapurna"
-            },
-            {
-              trek_name: "Everest Base Camp",
-              difficulty_level: "Hard",
-              cost: 18000,
-              duration_days: 16,
-              image_url: "https://images.unsplash.com/photo-1517824806704-9040b037703b?q=80&w=800",
-              _id: "everest"
-            },
-            {
-              trek_name: "Gosaikunda Trek",
-              difficulty_level: "Moderate",
-              cost: 8000,
-              duration_days: 7,
-              image_url: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=800",
-              _id: "gosaikunda"
-            }
-          ]).map((trek) => (
-            <div
-              key={trek.name}
-              className="rounded-xl overflow-hidden transition-transform hover:-translate-y-1"
-              style={{ backgroundColor: "#1A2235", border: "1px solid #1F2937" }}
-            >
-              <div className="relative">
-                <img
-                  src={trek.image_url ? `http://localhost:5000${trek.image_url}` : "https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=2000"} 
-                  className="w-full h-48 object-cover"
-                  alt={trek.trek_name}
-                />
-                <span
-                  className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold"
-                  style={{ backgroundColor: "#AAFF00", color: "#0A0F1C" }}
-                >
-                  {trek.difficulty_level || "Adventure"}
-                </span>
-              </div>
-              <div className="p-5">
-                <h3 className="font-bold text-white text-lg">{trek.trek_name}</h3>
-                <div className="flex justify-between items-center mt-2">
-                  <span className="text-sm" style={{ color: "#9CA3AF" }}>
-                    {trek.duration_days} Days
-                  </span>
-                  <span className="font-bold" style={{ color: "#AAFF00" }}>
-                    Rs. {trek.cost}
+          {dbTreks.length > 0 ? (
+            dbTreks.slice(0, 3).map((trek) => (
+              <div 
+                key={trek._id} 
+                className="rounded-xl overflow-hidden transition-transform hover:-translate-y-1"
+                style={{ backgroundColor: "#1A2235", border: "1px solid #1F2937" }}
+              >
+                <div className="relative">
+                  <img
+                    src={trek.image_url ? `http://localhost:5000${trek.image_url}` : "https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=2000"} 
+                    className="w-full h-48 object-cover"
+                    alt={trek.trek_name}
+                  />
+                  <span
+                    className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold"
+                    style={{ backgroundColor: "#AAFF00", color: "#0A0F1C" }}
+                  >
+                    {trek.difficulty_level || "Adventure"}
                   </span>
                 </div>
-                <button
-                  onClick={() => navigate(`/trek/${trek._id}`)}
-                  className="mt-4 w-full py-2 rounded-md font-semibold text-sm transition-colors"
-                  style={{ backgroundColor: "#AAFF00", color: "#0A0F1C" }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = "#88CC00"}
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = "#AAFF00"}
-                >
-                  View Details
-                </button>
+                <div className="p-5 flex flex-col h-full">
+                  <h3 className="text-xl font-bold text-white mb-2">{trek.trek_name}</h3>
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-sm" style={{ color: "#9CA3AF" }}>
+                      {trek.duration_days} Days
+                    </span>
+                    <span className="font-bold" style={{ color: "#AAFF00" }}>
+                      Rs. {trek.cost}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => navigate(`/trek/${trek._id}`)}
+                    className="mt-4 w-full py-2 rounded-md font-semibold text-sm transition-colors"
+                    style={{ backgroundColor: "#AAFF00", color: "#0A0F1C" }}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = "#fff"}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = "#AAFF00"}
+                  >
+                    View Details
+                  </button>
+                </div>
               </div>
+            ))
+          ) : (
+            <div className="md:col-span-3 py-20 text-center bg-[#1A2235] rounded-3xl border border-dashed border-gray-800">
+              <p className="text-5xl mb-4 grayscale opacity-50">🏔️</p>
+              <h3 className="text-xl font-bold text-white uppercase tracking-widest">No Routes Listed Yet</h3>
+              <p className="text-gray-500 text-sm mt-2">New trekking routes will appear here once guides upload their blueprints.</p>
             </div>
-          ))}
+          )}
         </div>
       </section>
 
@@ -193,97 +176,71 @@ function MainHome() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
-          {(publicRides.length > 0 ? publicRides : [
-            {
-              _id: "demo_1",
-              ride_name: "Kathmandu to Syabrubesi Express",
-              pickup_location: "Machhapokhari, Kathmandu",
-              drop_location: "Syabrubesi (Langtang)",
-              departure_time: new Date(Date.now() + 86400000).toISOString(),
-              available_seats: 5,
-              price: 1500,
-              vehicle_type: "Shared Jeep (4WD)",
-              vendor_id: { name: "Himalayan Travels" }
-            },
-            {
-              _id: "demo_2",
-              ride_name: "KTM to Pokhara Tourist Coach",
-              pickup_location: "Sorahkhutte, Kathmandu",
-              drop_location: "Lakeside, Pokhara",
-              departure_time: new Date(Date.now() + 172800000).toISOString(),
-              available_seats: 12,
-              price: 1200,
-              vehicle_type: "Deluxe Bus",
-              vendor_id: { name: "Greenline Tours" }
-            },
-            {
-              _id: "demo_3",
-              ride_name: "Nepalgunj to Juphal (Phoksundo)",
-              pickup_location: "Nepalgunj Airport",
-              drop_location: "Juphal Airport",
-              departure_time: new Date(Date.now() + 259200000).toISOString(),
-              available_seats: 3,
-              price: 5500,
-              vehicle_type: "Charter Jeep",
-              vendor_id: { name: "Mountain Logistics" }
-            }
-          ]).map((ride) => (
-            <div 
-              key={ride._id} 
-              className="p-6 rounded-xl relative group transition-all hover:border-[#AAFF00]/50 flex flex-col h-full" 
-              style={{ backgroundColor: "#1A2235", border: "1px solid #1F2937" }}
-            >
-              <div className="flex-grow">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <p className="text-[0.6rem] font-black text-[#AAFF00] uppercase tracking-widest mb-1">
-                      Verified Transport {ride._id.startsWith("demo") ? "(Demo)" : ""}
-                    </p>
-                    <h3 className="font-bold text-lg text-white leading-tight">{ride.ride_name}</h3>
-                    <p className="text-xs text-gray-400 mt-1">{ride.vehicle_type} • {ride.vendor_id?.name || "Verified Vendor"}</p>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-[#AAFF00] font-black text-lg block">Rs. {ride.price}</span>
-                    <span className="text-[0.6rem] text-gray-500 uppercase font-bold">Per Seat</span>
-                  </div>
-                </div>
-                
-                <div className="bg-[#0A0F1C] p-4 rounded-lg space-y-3 mb-6 border border-gray-800">
-                  <div className="flex items-center text-xs text-gray-300">
-                    <span className="w-8 h-8 rounded-md bg-gray-800 flex items-center justify-center mr-3">📅</span> 
-                    <div>
-                      <p className="text-[0.5rem] text-gray-500 font-bold uppercase">Departure Date</p>
-                      <p>{new Date(ride.departure_time).toLocaleDateString()} at {new Date(ride.departure_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center text-xs text-gray-300">
-                    <span className="w-8 h-8 rounded-md bg-gray-800 flex items-center justify-center mr-3">📍</span> 
-                    <div>
-                      <p className="text-[0.5rem] text-gray-500 font-bold uppercase">Pickup Point</p>
-                      <p>{ride.pickup_location}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center text-xs text-gray-300">
-                    <span className="w-8 h-8 rounded-md bg-gray-800 flex items-center justify-center mr-3">💺</span> 
-                    <div>
-                      <p className="text-[0.5rem] text-gray-500 font-bold uppercase">Availability</p>
-                      <p className="font-bold text-[#AAFF00]">{ride.available_seats} Seats Remaining</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={() => handleBookRide(ride._id)}
-                className="w-full py-3 rounded-xl font-black uppercase text-xs transition-all shadow-lg active:scale-95"
-                style={{ backgroundColor: "#AAFF00", color: "#0A0F1C" }}
-                onMouseEnter={e => e.currentTarget.style.backgroundColor = "#fff"}
-                onMouseLeave={e => e.currentTarget.style.backgroundColor = "#AAFF00"}
+          {publicRides.length > 0 ? (
+            publicRides.map((ride) => (
+              <div 
+                key={ride._id} 
+                className="p-6 rounded-xl relative group transition-all hover:border-[#AAFF00]/50 flex flex-col h-full" 
+                style={{ backgroundColor: "#1A2235", border: "1px solid #1F2937" }}
               >
-                Reserve Seat Now
-              </button>
-            </div>
-          ))}
+                <div className="flex-grow">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <p className="text-[0.6rem] font-black text-[#AAFF00] uppercase tracking-widest mb-1">
+                        Verified Transport
+                      </p>
+                      <h3 className="font-bold text-lg text-white leading-tight">{ride.ride_name}</h3>
+                      <p className="text-xs text-gray-400 mt-1">{ride.vehicle_type} • {ride.vendor_id?.name || "Verified Vendor"}</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[#AAFF00] font-black text-lg block">Rs. {ride.price}</span>
+                      <span className="text-[0.6rem] text-gray-500 uppercase font-bold">Per Seat</span>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-[#0A0F1C] p-4 rounded-lg space-y-3 mb-6 border border-gray-800">
+                    <div className="flex items-center text-xs text-gray-300">
+                      <span className="w-8 h-8 rounded-md bg-gray-800 flex items-center justify-center mr-3">📅</span> 
+                      <div>
+                        <p className="text-[0.5rem] text-gray-500 font-bold uppercase">Departure Date</p>
+                        <p>{new Date(ride.departure_time).toLocaleDateString()} at {new Date(ride.departure_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center text-xs text-gray-300">
+                      <span className="w-8 h-8 rounded-md bg-gray-800 flex items-center justify-center mr-3">📍</span> 
+                      <div>
+                        <p className="text-[0.5rem] text-gray-500 font-bold uppercase">Pickup Point</p>
+                        <p>{ride.pickup_location}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center text-xs text-gray-300">
+                      <span className="w-8 h-8 rounded-md bg-gray-800 flex items-center justify-center mr-3">💺</span> 
+                      <div>
+                        <p className="text-[0.5rem] text-gray-500 font-bold uppercase">Availability</p>
+                        <p className="font-bold text-[#AAFF00]">{ride.available_seats} Seats Remaining</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => handleBookRide(ride._id)}
+                  className="w-full py-3 rounded-xl font-black uppercase text-xs transition-all shadow-lg active:scale-95"
+                  style={{ backgroundColor: "#AAFF00", color: "#0A0F1C" }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = "#fff"}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = "#AAFF00"}
+                >
+                  Reserve Seat Now
+                </button>
+              </div>
+            ))
+          ) : (
+             <div className="md:col-span-3 py-20 text-center bg-[#1A2235] rounded-3xl border border-dashed border-gray-800">
+                <p className="text-5xl mb-4 grayscale opacity-50">🚙</p>
+                <h3 className="text-xl font-bold text-white uppercase tracking-widest">No Rides Scheduled</h3>
+                <p className="text-gray-500 text-sm mt-2">New transport options will appear here as vendors list them.</p>
+             </div>
+          )}
         </div>
       </section>
 

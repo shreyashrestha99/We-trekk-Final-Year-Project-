@@ -113,7 +113,7 @@ function ManageRides() {
                 </button>
                 {/* Edit functionality left as a simple alert placeholder for future implementation to adhere strictly to basic requirements */}
                 <button 
-                  onClick={() => alert("Edit modal/page UI would open here.")}
+                  onClick={() => navigate("/vendor/create-ride", { state: { editRide: ride } })}
                   className="px-4 py-2 rounded-md font-bold text-sm border border-gray-700 text-gray-300 hover:bg-gray-800 transition-colors"
                 >
                   Edit Ride

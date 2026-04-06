@@ -18,22 +18,22 @@ function DashboardLayout({ children, menuItems }) {
 
       {/* SIDEBAR */}
       <aside
-        className="flex flex-col transition-all duration-300"
+        className="flex flex-col transition-all duration-300 overflow-y-auto custom-scrollbar"
         style={{
           width: sidebarOpen ? "260px" : "70px",
           backgroundColor: "#111827",
-          borderRight: "1px solid #1F2937",
-          minHeight: "100vh",
+          height: "100vh",
           position: "fixed",
           top: 0,
           left: 0,
-          zIndex: 50
+          zIndex: 50,
+          borderRight: "1px solid #1F2937",
         }}
       >
         {/* LOGO */}
         <div
-          className="flex items-center justify-between px-4 py-5"
-          style={{ borderBottom: "1px solid #1F2937" }}
+          className="flex items-center justify-between px-4 py-5 sticky top-0 z-10"
+          style={{ borderBottom: "1px solid #1F2937", backgroundColor: "#111827" }}
         >
           {sidebarOpen && (
             <span
@@ -85,20 +85,14 @@ function DashboardLayout({ children, menuItems }) {
               <button
                 key={item.label}
                 onClick={() => navigate(item.path)}
-                className="w-full flex items-center space-x-3 px-3 py-3 rounded-lg transition-all text-left"
+                className="w-full flex items-center space-x-3 px-3 py-3 rounded-lg transition-all text-left group"
                 style={{
                   backgroundColor: isActive ? "#AAFF0020" : "transparent",
                   border: isActive ? "1px solid #AAFF0040" : "1px solid transparent",
                   color: isActive ? "#AAFF00" : "#9CA3AF"
                 }}
-                onMouseEnter={e => {
-                  if (!isActive) e.currentTarget.style.backgroundColor = "#1F2937"
-                }}
-                onMouseLeave={e => {
-                  if (!isActive) e.currentTarget.style.backgroundColor = "transparent"
-                }}
               >
-                <span className="text-lg">{item.icon}</span>
+                <span className="text-lg group-hover:scale-110 transition-transform">{item.icon}</span>
                 {sidebarOpen && (
                   <span className="text-sm font-medium">{item.label}</span>
                 )}
@@ -108,7 +102,7 @@ function DashboardLayout({ children, menuItems }) {
         </nav>
 
         {/* LOGOUT */}
-        <div className="px-2 py-4" style={{ borderTop: "1px solid #1F2937" }}>
+        <div className="px-2 py-4 sticky bottom-0 z-10" style={{ borderTop: "1px solid #1F2937", backgroundColor: "#111827" }}>
           <button
             onClick={handleLogout}
             className="w-full flex items-center space-x-3 px-3 py-3 rounded-lg transition-all"
@@ -126,7 +120,7 @@ function DashboardLayout({ children, menuItems }) {
 
       {/* MAIN CONTENT */}
       <main
-        className="flex-1 transition-all duration-300"
+        className="flex-1 transition-all duration-300 min-h-screen flex flex-col"
         style={{ marginLeft: sidebarOpen ? "260px" : "70px" }}
       >
         {/* TOP BAR */}
@@ -155,7 +149,7 @@ function DashboardLayout({ children, menuItems }) {
         </header>
 
         {/* PAGE CONTENT */}
-        <div className="p-6">
+        <div className="p-6 flex-1">
           {children}
         </div>
       </main>

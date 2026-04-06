@@ -55,19 +55,51 @@ export const createSchedule = async (req, res) => {
   }
 };
 
-// PUT /api/schedules/:id/seats
-export const updateSeats = async (req, res) => {
+// PUT /api/schedules/:id
+export const updateSchedule = async (req, res) => {
   try {
-    const { available_seats } = req.body;
-    const schedule = await TrekSchedule.findByIdAndUpdate(
-      req.params.id, 
-      { available_seats }, 
-      { new: true }
-    );
+    const { date, available_seats } = req.body;
+    const schedule = await TrekSchedule.findById(req.params.id).populate("trek_id");
+    
     if (!schedule) return res.status(404).json({ message: "Schedule not found" });
-    res.json(schedule);
+
+    // Authorization
+    if (schedule.guide_id.toString() !== req.user.id) {
+       return res.status(403).json({ message: "Unauthorized to update this schedule" });
+    }
+
+    // Update and re-calculate end date
+    const startDate = new Date(date);
+    const endDate = new Date(date);
+    endDate.setDate(endDate.getDate() + (schedule.trek_id?.duration_days || 0));
+
+    schedule.date = startDate;
+    schedule.start_date = startDate;
+    schedule.end_date = endDate;
+    schedule.available_seats = Number(available_seats);
+
+    const updated = await schedule.save();
+    res.json(updated);
   } catch (error) {
     res.status(400).json({ message: error.message });
+  }
+};
+
+// DELETE /api/schedules/:id
+export const deleteSchedule = async (req, res) => {
+  try {
+    const schedule = await TrekSchedule.findById(req.params.id);
+    if (!schedule) return res.status(404).json({ message: "Schedule not found" });
+
+    // Authorization
+    if (schedule.guide_id.toString() !== req.user.id) {
+       return res.status(403).json({ message: "Unauthorized to delete this schedule" });
+    }
+
+    await TrekSchedule.findByIdAndDelete(req.params.id);
+    res.json({ message: "Schedule deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 

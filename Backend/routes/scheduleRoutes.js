@@ -1,5 +1,5 @@
 import express from "express";
-import { getSchedules, createSchedule, updateSeats, getGuideSchedules } from "../controller/scheduleController.js";
+import { getSchedules, createSchedule, updateSchedule, deleteSchedule, getGuideSchedules } from "../controller/scheduleController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { authorize } from "../middleware/roleMiddleware.js";
 
@@ -11,7 +11,8 @@ router.route("/")
   .get(getSchedules)
   .post(protect, authorize("Guide"), createSchedule);
 
-router.route("/:id/seats")
-  .put(protect, authorize("Guide", "Admin"), updateSeats);
+router.route("/:id")
+  .put(protect, authorize("Guide"), updateSchedule)
+  .delete(protect, authorize("Guide"), deleteSchedule);
 
 export default router;
