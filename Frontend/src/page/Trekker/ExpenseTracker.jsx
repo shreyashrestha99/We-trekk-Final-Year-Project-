@@ -171,6 +171,7 @@ function ExpenseTracker() {
           </button>
           {expenses.length > 0 && (
             <button
+              onClick={handleDownloadPDF}
               className="px-4 py-2 rounded-md font-bold text-sm"
               style={{ border: "1px solid #AAFF00", color: "#AAFF00" }}
             >
