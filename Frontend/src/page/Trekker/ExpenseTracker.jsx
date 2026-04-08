@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import DashboardLayout from "../../components/DashboardLayout";
 import API from "../../utils/axios";  
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const menuItems = [
   { label: "Dashboard", icon: "🏠", path: "/trekker/dashboard" },
@@ -93,7 +95,8 @@ function ExpenseTracker() {
     }
   };
 
-  const handleDelete = async (id) => {
+ 
+   const handleDelete = async (id) => {
     try {
       await API.delete(`/api/expenses/${id}`);
       setExpenses(expenses.filter((e) => e.id !== id));
@@ -102,6 +105,37 @@ function ExpenseTracker() {
     }
   };
 
+
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.setTextColor(40);
+    doc.text("Expense Report", 14, 22);
+    doc.setFontSize(11);
+    doc.setTextColor(100);
+    doc.text(`Total Spent: NPR ${total.toLocaleString()}`, 14, 32);
+    doc.text(`Total Entries: ${expenses.length}`, 14, 39);
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 46);
+    autoTable(doc, {
+      startY: 55,
+      head: [["#", "Category", "Amount (NPR)", "Date", "Description"]],
+      body: expenses.map((e, i) => [
+        i + 1,
+        e.category.charAt(0).toUpperCase() + e.category.slice(1),
+        Number(e.amount).toLocaleString(),
+        e.date,
+        e.description || "—",
+      ]),
+      headStyles: {
+        fillColor: [170, 255, 0],
+        textColor: [10, 15, 28],
+        fontStyle: "bold",
+      },
+      alternateRowStyles: { fillColor: [245, 245, 245] },
+      styles: { fontSize: 10 },
+    });
+    doc.save("expense-report.pdf");
+  };
   const total = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
   const byCategory = categories
     .map((cat) => ({
@@ -145,7 +179,7 @@ function ExpenseTracker() {
           )}
         </div>
       </div>
-
+      
       {/* ADD EXPENSE FORM */}
       {showForm && (
         <div
