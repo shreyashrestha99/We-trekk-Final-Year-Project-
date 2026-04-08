@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DashboardLayout from "../../components/DashboardLayout";
+import API from "../../utils/axios";  
 
 const menuItems = [
   { label: "Dashboard", icon: "🏠", path: "/trekker/dashboard" },
@@ -16,21 +17,37 @@ function ExpenseTracker() {
     amount: "",
     category: "",
     date: "",
-    description: ""
+    description: "",
   });
   const [errors, setErrors] = useState({});
   const [showForm, setShowForm] = useState(false);
 
-  const categories = [
-    "food", "transport", "accommodation", "gear", "other"
-  ];
+  useEffect(() => {
+    const fetchExpenses = async () => {
+      try {
+        const res = await API.get("/api/expenses/my");
+        const formatted = res.data.map((e) => ({
+          id: e._id,
+          amount: e.amount,
+          category: e.category,
+          date: e.expense_date?.split("T")[0],
+          description: e.description,
+        }));
+        setExpenses(formatted);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchExpenses();
+  }, []);
 
+  const categories = ["food", "transport", "accommodation", "gear", "other"];
   const categoryColors = {
     food: "#F59E0B",
     transport: "#60A5FA",
     accommodation: "#34D399",
     gear: "#A78BFA",
-    other: "#9CA3AF"
+    other: "#9CA3AF",
   };
 
   const validate = () => {
@@ -38,43 +55,72 @@ function ExpenseTracker() {
     if (!form.amount) newErrors.amount = "Amount is required";
     else if (isNaN(form.amount) || Number(form.amount) <= 0)
       newErrors.amount = "Enter a valid amount";
+
     if (!form.category) newErrors.category = "Category is required";
     if (!form.date) newErrors.date = "Date is required";
     return newErrors;
   };
 
-  const handleAdd = (e) => {
+  const handleAdd = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
-    setExpenses([...expenses, { ...form, id: Date.now() }]);
-    setForm({ amount: "", category: "", date: "", description: "" });
-    setErrors({});
-    setShowForm(false);
+    try {
+      const res = await API.post("/api/expenses", {
+        amount: Number(form.amount),
+        category: form.category,
+        expense_date: form.date,
+        description: form.description,
+      });
+
+      const newExpense = {
+        id: res.data._id,
+        amount: res.data.amount,
+        category: res.data.category,
+        date: res.data.expense_date?.split("T")[0],
+        description: res.data.description,
+      };
+
+      setExpenses([newExpense, ...expenses]);
+      setForm({ amount: "", category: "", date: "", description: "" });
+      setErrors({});
+      setShowForm(false);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleDelete = (id) => {
-    setExpenses(expenses.filter(e => e.id !== id));
+  const handleDelete = async (id) => {
+    try {
+      await API.delete(`/api/expenses/${id}`);
+      setExpenses(expenses.filter((e) => e.id !== id));
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const total = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
-
-  const byCategory = categories.map(cat => ({
-    category: cat,
-    total: expenses
-      .filter(e => e.category === cat)
-      .reduce((sum, e) => sum + Number(e.amount), 0)
-  })).filter(c => c.total > 0);
+  const byCategory = categories
+    .map((cat) => ({
+      category: cat,
+      total: expenses
+        .filter((e) => e.category === cat)
+        .reduce((sum, e) => sum + Number(e.amount), 0),
+    }))
+    .filter((c) => c.total > 0);
 
   return (
     <DashboardLayout menuItems={menuItems}>
+      {/* HEADER */}
       <div className="mb-8 flex justify-between items-center">
         <div>
-          <p className="text-sm font-semibold tracking-widest uppercase"
-            style={{ color: "#AAFF00" }}>
+          <p
+            className="text-sm font-semibold tracking-widest uppercase"
+            style={{ color: "#AAFF00" }}
+          >
             Finance
           </p>
           <h1 className="text-3xl font-black text-white mt-1">
@@ -106,8 +152,11 @@ function ExpenseTracker() {
           className="p-6 rounded-xl mb-6"
           style={{ backgroundColor: "#1A2235", border: "1px solid #AAFF00" }}
         >
-          <h2 className="text-lg font-bold text-white mb-4">Add New Expense</h2>
+          <h2 className="text-lg font-bold text-white mb-4">
+            Add New Expense
+          </h2>
           <form onSubmit={handleAdd} className="grid md:grid-cols-2 gap-4">
+            {/* AMOUNT */}
             <div>
               <label className="block text-sm font-medium mb-2 text-white">
                 Amount (NPR)
@@ -118,12 +167,18 @@ function ExpenseTracker() {
                 className="w-full rounded-md p-3 text-white text-sm outline-none"
                 style={{
                   backgroundColor: "#0A0F1C",
-                  border: `1px solid ${errors.amount ? "#EF4444" : "#1F2937"}`
+                  border: `1px solid ${errors.amount ? "#EF4444" : "#1F2937"}`,
                 }}
                 value={form.amount}
-                onChange={e => setForm({ ...form, amount: e.target.value })}
-                onFocus={e => e.target.style.borderColor = "#AAFF00"}
-                onBlur={e => e.target.style.borderColor = errors.amount ? "#EF4444" : "#1F2937"}
+                onChange={(e) =>
+                  setForm({ ...form, amount: e.target.value })
+                }
+                onFocus={(e) => (e.target.style.borderColor = "#AAFF00")}
+                onBlur={(e) =>
+                  (e.target.style.borderColor = errors.amount
+                    ? "#EF4444"
+                    : "#1F2937")
+                }
               />
               {errors.amount && (
                 <p className="text-xs mt-1" style={{ color: "#EF4444" }}>
@@ -132,6 +187,7 @@ function ExpenseTracker() {
               )}
             </div>
 
+            {/* CATEGORY */}
             <div>
               <label className="block text-sm font-medium mb-2 text-white">
                 Category
@@ -141,15 +197,21 @@ function ExpenseTracker() {
                 style={{
                   backgroundColor: "#0A0F1C",
                   border: `1px solid ${errors.category ? "#EF4444" : "#1F2937"}`,
-                  color: form.category ? "white" : "#6B7280"
+                  color: form.category ? "white" : "#6B7280",
                 }}
                 value={form.category}
-                onChange={e => setForm({ ...form, category: e.target.value })}
-                onFocus={e => e.target.style.borderColor = "#AAFF00"}
-                onBlur={e => e.target.style.borderColor = errors.category ? "#EF4444" : "#1F2937"}
+                onChange={(e) =>
+                  setForm({ ...form, category: e.target.value })
+                }
+                onFocus={(e) => (e.target.style.borderColor = "#AAFF00")}
+                onBlur={(e) =>
+                  (e.target.style.borderColor = errors.category
+                    ? "#EF4444"
+                    : "#1F2937")
+                }
               >
                 <option value="">Select category</option>
-                {categories.map(cat => (
+                {categories.map((cat) => (
                   <option key={cat} value={cat}>
                     {cat.charAt(0).toUpperCase() + cat.slice(1)}
                   </option>
@@ -162,6 +224,7 @@ function ExpenseTracker() {
               )}
             </div>
 
+            {/* DATE */}
             <div>
               <label className="block text-sm font-medium mb-2 text-white">
                 Date
@@ -172,12 +235,14 @@ function ExpenseTracker() {
                 style={{
                   backgroundColor: "#0A0F1C",
                   border: `1px solid ${errors.date ? "#EF4444" : "#1F2937"}`,
-                  colorScheme: "dark"
+                  colorScheme: "dark",
                 }}
                 value={form.date}
-                onChange={e => setForm({ ...form, date: e.target.value })}
-                onFocus={e => e.target.style.borderColor = "#AAFF00"}
-                onBlur={e => e.target.style.borderColor = errors.date ? "#EF4444" : "#1F2937"}
+                onChange={(e) => setForm({ ...form, date: e.target.value })}
+                onFocus={(e) => (e.target.style.borderColor = "#AAFF00")}
+                onBlur={(e) =>
+                  (e.target.style.borderColor = errors.date ? "#EF4444" : "#1F2937")
+                }
               />
               {errors.date && (
                 <p className="text-xs mt-1" style={{ color: "#EF4444" }}>
@@ -186,6 +251,7 @@ function ExpenseTracker() {
               )}
             </div>
 
+            {/* DESCRIPTION */}
             <div>
               <label className="block text-sm font-medium mb-2 text-white">
                 Description (optional)
@@ -196,12 +262,15 @@ function ExpenseTracker() {
                 className="w-full rounded-md p-3 text-white text-sm outline-none"
                 style={{ backgroundColor: "#0A0F1C", border: "1px solid #1F2937" }}
                 value={form.description}
-                onChange={e => setForm({ ...form, description: e.target.value })}
-                onFocus={e => e.target.style.borderColor = "#AAFF00"}
-                onBlur={e => e.target.style.borderColor = "#1F2937"}
+                onChange={(e) =>
+                  setForm({ ...form, description: e.target.value })
+                }
+                onFocus={(e) => (e.target.style.borderColor = "#AAFF00")}
+                onBlur={(e) => (e.target.style.borderColor = "#1F2937")}
               />
             </div>
 
+            {/* FORM BUTTONS */}
             <div className="md:col-span-2 flex space-x-3">
               <button
                 type="submit"
@@ -236,6 +305,7 @@ function ExpenseTracker() {
             NPR {total.toLocaleString()}
           </p>
         </div>
+
         <div
           className="p-5 rounded-xl"
           style={{ backgroundColor: "#1A2235", border: "1px solid #1F2937" }}
@@ -247,6 +317,7 @@ function ExpenseTracker() {
             {expenses.length}
           </p>
         </div>
+
         <div
           className="p-5 rounded-xl"
           style={{ backgroundColor: "#1A2235", border: "1px solid #1F2937" }}
@@ -283,15 +354,12 @@ function ExpenseTracker() {
                     NPR {catTotal.toLocaleString()}
                   </span>
                 </div>
-                <div
-                  className="h-2 rounded-full"
-                  style={{ backgroundColor: "#1F2937" }}
-                >
+                <div className="h-2 rounded-full" style={{ backgroundColor: "#1F2937" }}>
                   <div
                     className="h-2 rounded-full transition-all"
                     style={{
                       width: `${(catTotal / total) * 100}%`,
-                      backgroundColor: categoryColors[category]
+                      backgroundColor: categoryColors[category],
                     }}
                   />
                 </div>
@@ -309,7 +377,6 @@ function ExpenseTracker() {
         <div className="p-4" style={{ borderBottom: "1px solid #1F2937" }}>
           <h2 className="text-lg font-bold text-white">All Expenses</h2>
         </div>
-
         {expenses.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-4xl mb-3">💰</p>
@@ -331,7 +398,7 @@ function ExpenseTracker() {
                     style={{
                       backgroundColor: categoryColors[expense.category] + "20",
                       color: categoryColors[expense.category],
-                      border: `1px solid ${categoryColors[expense.category]}`
+                      border: `1px solid ${categoryColors[expense.category]}`,
                     }}
                   >
                     {expense.category.charAt(0)}

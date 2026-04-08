@@ -10,7 +10,8 @@ function TrekDetails() {
   const [trek, setTrek] = useState(null);
   const [schedules, setSchedules] = useState([]);
   const [rides, setRides] = useState([]);
-  const [groups, setGroups] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(true);
 
   const fetchDetails = async () => {
@@ -35,12 +36,9 @@ function TrekDetails() {
       const rideRes = await API.get(`/api/rides?trek_id=${trekDbId}`);
       setRides(rideRes.data);
 
-      // 4. Community Groups
-      const groupRes = await API.get("/api/groups");
-      const matchedGroups = groupRes.data.filter(g => 
-        matchedSchedules.some(s => s._id === (g.schedule_id?._id || g.schedule_id))
-      );
-      setGroups(matchedGroups);
+      // 4. Trek Reviews
+      const reviewRes = await API.get(`/api/reviews/trek/${trekDbId}`);
+      setReviews(reviewRes.data);
 
     } catch (error) {
       console.error("Failed to load trek details", error);
@@ -73,23 +71,28 @@ function TrekDetails() {
     }
   };
 
-  const handleJoinGroup = async (groupId) => {
+  const handleAddReview = async (e) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
+
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("Login required to join groups.");
+      alert("Please login to leave a review.");
       navigate("/login");
       return;
     }
+
     try {
-      await API.post(`/api/groups/${groupId}/join`, { 
-        needs_transport: false, 
-        needs_accommodation: false, 
-        needs_guide: false 
+      await API.post("/api/reviews", { 
+        trek_id: trek._id, 
+        comment: newComment, 
+        rating: 5 // Default rating to keep it simple as requested
       });
-      alert("Joined group successfully!");
-      fetchDetails();
+      setNewComment("");
+      fetchDetails(); // Refresh list
+      alert("Thank you for your feedback!");
     } catch (error) {
-       alert(error.response?.data?.message || "Failed to join group.");
+       alert(error.response?.data?.message || "Failed to post review.");
     }
   };
 
@@ -239,33 +242,46 @@ function TrekDetails() {
 
            <section>
               <h2 className="text-lg font-black text-white uppercase tracking-widest mb-6 flex items-center gap-3">
-                 <span className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center text-xs">👥</span>
-                 Trekker Communities
+                 <span className="w-8 h-8 rounded-lg bg-pink-500/10 text-pink-400 flex items-center justify-center text-xs">✍️</span>
+                 Trekker Reviews
               </h2>
-              {groups.length === 0 ? (
-                <div className="bg-[#AAFF00]/5 p-8 rounded-2xl border border-[#AAFF00]/10 text-center">
-                   <p className="text-2xl mb-2 grayscale">🎒</p>
-                   <p className="text-xs text-gray-400 font-bold uppercase tracking-widest leading-loose">No open communities found. Be the first to start a group after booking!</p>
+
+              {/* POST REVIEW BOX (For Logged-in Trekkers) */}
+              <div className="bg-[#1A2235] p-6 rounded-2xl border border-gray-800 mb-8 border-b-2 border-b-[#AAFF00]/30 shadow-2xl">
+                 <p className="text-[0.6rem] text-gray-500 font-black uppercase tracking-widest mb-3">Share your experience</p>
+                 <textarea 
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="Write a short comment..."
+                    className="w-full bg-[#0A0F1C] border border-gray-800 rounded-xl p-4 text-sm text-gray-300 focus:outline-none focus:border-[#AAFF00] transition-all resize-none min-h-[100px]"
+                 />
+                 <button 
+                    onClick={handleAddReview}
+                    className="mt-4 w-full py-4 bg-[#AAFF00] text-black font-black uppercase text-[0.65rem] tracking-widest rounded-xl hover:bg-white transition-all transform active:scale-95 shadow-xl shadow-[#AAFF00]/5"
+                 >
+                    Post Review
+                 </button>
+              </div>
+
+              {/* REVIEWS LIST */}
+              {reviews.length === 0 ? (
+                <div className="bg-gray-900/20 p-8 rounded-2xl border border-dashed border-gray-800 text-center">
+                   <p className="text-xl mb-2 grayscale opacity-40">💬</p>
+                   <p className="text-[0.6rem] text-gray-600 font-bold uppercase tracking-widest">No reviews yet. Be the first to shout out!</p>
                 </div>
               ) : (
                 <div className="grid gap-4">
-                   {groups.map(grp => (
-                      <div key={grp._id} className="bg-[#111827] p-6 rounded-2xl border border-gray-800 transition-all hover:bg-[#1A2235]">
-                         <div className="flex justify-between items-center mb-4">
-                            <h3 className="font-black text-white uppercase tracking-tight">{grp.group_name}</h3>
-                            <span className="text-[0.6rem] bg-purple-500/20 text-purple-400 px-2 py-1 rounded-full font-black uppercase">{grp.status}</span>
+                   {reviews.map(rev => (
+                      <div key={rev._id} className="bg-[#111827] p-5 rounded-2xl border border-gray-800 transition-all hover:bg-[#1A2235]">
+                         <div className="flex justify-between items-center mb-3">
+                            <span className="text-[0.65rem] font-black text-[#AAFF00] uppercase tracking-tighter">
+                               {rev.trekker_id?.trekker_name || "Adventurer"}
+                            </span>
+                            <span className="text-[0.6rem] text-gray-600 font-medium">
+                               {new Date(rev.createdAt).toLocaleDateString()}
+                            </span>
                          </div>
-                         <div className="flex items-center justify-between text-xs text-gray-400 font-bold uppercase mb-4">
-                            <span>{grp.current_members} / {grp.max_members} Members</span>
-                            <span className="text-gray-600">|</span>
-                            <span>{grp.meeting_point}</span>
-                         </div>
-                         <button 
-                            onClick={() => handleJoinGroup(grp._id)}
-                            className="w-full py-3 border border-purple-500/30 text-purple-400 font-black uppercase text-[0.6rem] tracking-widest rounded-xl hover:bg-purple-500 hover:text-white transition-all shadow-lg active:scale-95"
-                         >
-                            Join Community
-                         </button>
+                         <p className="text-sm text-gray-400 italic leading-relaxed">"{rev.comment}"</p>
                       </div>
                    ))}
                 </div>

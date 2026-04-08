@@ -70,24 +70,30 @@ export const getTrekById = async (req, res) => {
 export const createTrek = async (req, res) => {
   try {
     const trekData = { ...req.body };
+    
+    // Explicitly cast numeric fields to prevent validation errors with FormData/Multer
+    if (trekData.cost) trekData.cost = Number(trekData.cost);
+    if (trekData.duration_days) trekData.duration_days = Number(trekData.duration_days);
+    if (trekData.max_group_size) trekData.max_group_size = Number(trekData.max_group_size);
+
     if (req.file) {
       trekData.image_url = `/uploads/${req.file.filename}`;
     }
 
-    const trek = new Trek({
+    const trek = await Trek.create({
       ...trekData,
       guide_id: req.user.id
     });
-    const createdTrek = await trek.save();
 
     await Notification.create({
       user_id: req.user.id,
       type: "trek_created",
-      message: `Trek "${createdTrek.trek_name}" blueprint created successfully.`
+      message: `Trek "${trek.trek_name}" blueprint created successfully.`
     });
 
-    res.status(201).json(createdTrek);
+    res.status(201).json(trek);
   } catch (error) {
+    console.error("Create Trek Error:", error);
     res.status(400).json({ message: error.message });
   }
 };
