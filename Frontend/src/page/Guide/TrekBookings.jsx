@@ -71,6 +71,7 @@ function TrekBookings() {
                        <th className="p-4 px-6">Trekker Name</th>
                        <th className="p-4">Trek Target</th>
                        <th className="p-4 font-mono">Seats Reserved</th>
+                       <th className="p-4">Amount Due</th>
                        <th className="p-4">Booking Status</th>
                        <th className="p-4">Timestamp</th>
                        <th className="p-4 text-center">Actions</th>
@@ -97,8 +98,11 @@ function TrekBookings() {
                              </p>
                           </td>
                           <td className="p-4">
-                             <span className="font-black text-xl text-white ml-6">{booking.seats}</span>
-                          </td>
+                              <span className="font-black text-xl text-white ml-6">{booking.seats}</span>
+                           </td>
+                           <td className="p-4 font-mono text-sm text-[#AAFF00]">
+                              NPR {( (booking.trek_schedule_id?.trek_id?.cost || 0) * booking.seats ).toLocaleString()}
+                           </td>
                           <td className="p-4">
                              <span className={`px-3 py-1 text-xs font-black uppercase tracking-widest rounded-full border ${getStatusColor(booking.booking_status)}`}>
                                {booking.booking_status}
@@ -107,34 +111,43 @@ function TrekBookings() {
                           <td className="p-4">
                              <p className="text-sm font-medium text-gray-400">{new Date(booking.createdAt).toLocaleString()}</p>
                           </td>
-                          <td className="p-4">
-                             <div className="flex justify-center gap-2">
-                                {booking.booking_status === "Pending" && (
-                                   <button 
-                                      onClick={() => handleStatusUpdate(booking._id, "Confirmed")}
-                                      className="px-4 py-2 bg-[#34D399] text-black text-[10px] font-black uppercase rounded-lg hover:bg-white transition-all shadow-lg"
-                                   >
-                                      Confirm
-                                   </button>
-                                )}
-                                {booking.booking_status === "Confirmed" && (
-                                   <button 
-                                      onClick={() => handleStatusUpdate(booking._id, "Completed")}
-                                      className="px-4 py-2 bg-blue-500 text-white text-[10px] font-black uppercase rounded-lg hover:bg-blue-400 transition-all shadow-lg"
-                                   >
-                                      Complete
-                                   </button>
-                                )}
-                                {(booking.booking_status === "Pending" || booking.booking_status === "Confirmed") && (
-                                   <button 
-                                      onClick={() => handleStatusUpdate(booking._id, "Cancelled")}
-                                      className="px-4 py-2 bg-red-500/10 border border-red-500/30 text-red-500 text-[10px] font-black uppercase rounded-lg hover:bg-red-500 hover:text-white transition-all"
-                                   >
-                                      Cancel
-                                   </button>
-                                )}
-                             </div>
-                          </td>
+                           <td className="p-4 text-center">
+                              <div className="flex flex-col gap-2">
+                                 {booking.booking_status === "Pending" && (
+                                    <span className="text-[10px] text-gray-500 italic font-bold">Waiting for Trekker...</span>
+                                 )}
+                                 
+                                 {booking.booking_status === "Confirmed by Trekker" && (
+                                    <button 
+                                       onClick={() => handleStatusUpdate(booking._id, "Confirmed")}
+                                       className="px-4 py-2 bg-[#AAFF00] text-black text-[10px] font-black uppercase rounded-lg hover:bg-white transition-all shadow-lg"
+                                    >
+                                       Confirm Roster
+                                    </button>
+                                 )}
+
+                                 {booking.booking_status === "Confirmed" && (
+                                    <div className="flex flex-col gap-1 text-center">
+                                       <span className="text-[10px] text-blue-400 font-black uppercase">Confirmed</span>
+                                       <button 
+                                          onClick={() => handleStatusUpdate(booking._id, "Completed")}
+                                          className="px-4 py-1 bg-blue-500 text-white text-[10px] font-black uppercase rounded hover:bg-blue-400 transition-all"
+                                       >
+                                          Complete
+                                       </button>
+                                    </div>
+                                 )}
+
+                                 {(booking.booking_status !== "Cancelled" && booking.booking_status !== "Completed") && (
+                                    <button 
+                                       onClick={() => handleStatusUpdate(booking._id, "Cancelled")}
+                                       className="px-4 py-2 bg-red-500/10 border border-red-500/30 text-red-500 text-[10px] font-black uppercase rounded-lg hover:bg-red-500 hover:text-white transition-all"
+                                    >
+                                       Cancel
+                                    </button>
+                                 )}
+                              </div>
+                           </td>
                        </tr>
                     ))}
                  </tbody>

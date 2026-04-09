@@ -343,9 +343,38 @@ function MyBookings() {
                    )}
 
                    {booking.booking_status === "Confirmed by Trekker" && (
-                     <p className="text-xs font-bold text-gray-500 italic flex items-center">
-                        ⏳ Awaiting Guide/Vendor Confirmation
-                     </p>
+                     <div className="flex-1 flex justify-between items-center bg-[#0A0F1C] p-2 rounded-lg border border-[#AAFF00]/20">
+                        <p className="text-[10px] font-bold text-gray-500 italic">
+                           ⏳ Awaiting Guide/Vendor Final Confirmation...
+                        </p>
+                        <button
+                          onClick={() => handleCancelBooking(booking._id)}
+                          className="px-3 py-1 rounded text-[10px] font-bold uppercase"
+                          style={{
+                            backgroundColor: "#EF444420",
+                            color: "#EF4444",
+                          }}
+                        >
+                          Withdraw
+                        </button>
+                     </div>
+                   )}
+
+                   {booking.booking_status === "Confirmed" && (
+                     <div className="flex-1 flex justify-between items-center bg-[#AAFF00]/10 p-2 rounded-lg border border-[#AAFF00]/30">
+                        <p className="text-[10px] font-black text-[#AAFF00] uppercase tracking-wider">
+                           ✅ Reservation Secured! 
+                        </p>
+                        <button
+                          className="px-6 py-2 rounded-md text-xs font-black uppercase tracking-widest transition-all hover:scale-105"
+                          style={{
+                            backgroundColor: "#AAFF00",
+                            color: "#0A0F1C"
+                          }}
+                        >
+                          💳 Pay NPR {((booking.trek_schedule_id?.trek_id?.cost || booking.ride_id?.price || 0) * (booking.seats || 1)).toLocaleString()}
+                        </button>
+                     </div>
                    )}
 
                 </div>

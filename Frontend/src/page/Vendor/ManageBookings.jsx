@@ -67,6 +67,7 @@ function ManageBookings() {
                 <th className="px-6 py-4 border-b border-gray-800">Passenger Info</th>
                 <th className="px-6 py-4 border-b border-gray-800">Ride Details</th>
                 <th className="px-6 py-4 border-b border-gray-800">Seats</th>
+                <th className="px-6 py-4 border-b border-gray-800">Amount Due</th>
                 <th className="px-6 py-4 border-b border-gray-800">Status</th>
                 <th className="px-6 py-4 border-b border-gray-800 text-center">Actions</th>
               </tr>
@@ -88,6 +89,9 @@ function ManageBookings() {
                   <td className="px-6 py-4 font-bold text-white text-lg">
                     {booking.seats}
                   </td>
+                  <td className="px-6 py-4 text-[#AAFF00] font-mono">
+                    NPR {((booking.ride_id?.price || 0) * booking.seats).toLocaleString()}
+                  </td>
                   <td className="px-6 py-4">
                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                       booking.booking_status === "Confirmed" ? "bg-green-900 text-green-300" :
@@ -98,8 +102,12 @@ function ManageBookings() {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex justify-center gap-2">
+                    <div className="flex flex-col gap-2 justify-center">
                        {booking.booking_status === "Pending" && (
+                          <span className="text-[10px] text-gray-500 italic text-center">Waiting for Trekker</span>
+                       )}
+
+                       {booking.booking_status === "Confirmed by Trekker" && (
                           <button 
                              onClick={() => handleStatusUpdate(booking._id, "Confirmed")}
                              className="px-3 py-1 bg-[#AAFF00] text-black text-[10px] font-bold uppercase rounded active:scale-95"
@@ -107,6 +115,7 @@ function ManageBookings() {
                              Confirm
                           </button>
                        )}
+                       
                        {booking.booking_status === "Confirmed" && (
                           <button 
                              onClick={() => handleStatusUpdate(booking._id, "Completed")}
@@ -115,7 +124,8 @@ function ManageBookings() {
                              Complete
                           </button>
                        )}
-                       {(booking.booking_status === "Pending" || booking.booking_status === "Confirmed") && (
+
+                       {(booking.booking_status !== "Cancelled" && booking.booking_status !== "Completed") && (
                           <button 
                              onClick={() => handleStatusUpdate(booking._id, "Cancelled")}
                              className="px-3 py-1 border border-red-500 text-red-500 text-[10px] font-bold uppercase rounded hover:bg-red-500 hover:text-white"
