@@ -19,6 +19,17 @@ export const createBooking = async (req, res) => {
        return res.status(400).json({ message: `Not enough seats available. Only ${schedule.available_seats} remaining.` });
     }
 
+    // 2.5 Check if user already has an active booking for this schedule
+    const existingTrekBooking = await Booking.findOne({
+      user_id: req.user.id,
+      trek_schedule_id: schedule._id,
+      booking_status: { $ne: "Cancelled" }
+    });
+
+    if (existingTrekBooking) {
+      return res.status(400).json({ message: "You already have an active reservation for this trek departure." });
+    }
+
     // 3. Subtract seats
     schedule.available_seats -= requestedSeats;
     
@@ -67,6 +78,17 @@ export const bookRide = async (req, res) => {
 
     if (ride.available_seats < requestedSeats) {
       return res.status(400).json({ message: "Not enough seats available" });
+    }
+
+    // Check if user already has an active booking for this ride
+    const existingRideBooking = await Booking.findOne({
+      user_id: req.user.id,
+      ride_id: ride._id,
+      booking_status: { $ne: "Cancelled" }
+    });
+
+    if (existingRideBooking) {
+      return res.status(400).json({ message: "You already have an active reservation for this ride slot." });
     }
 
     // Check if any seats are already booked

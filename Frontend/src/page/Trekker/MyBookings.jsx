@@ -18,6 +18,8 @@ function MyBookings() {
   const [error, setError] = useState(null);
   const [activeFilter, setActiveFilter] = useState("All");
   const [activeType, setActiveType] = useState("All"); // "All", "Trek", "Ride"
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
 
   useEffect(() => {
     fetchBookings();
@@ -48,7 +50,10 @@ function MyBookings() {
     }
 
     // Filter by Status (Current activeFilter system)
-    if (activeFilter === "All") return filtered;
+    if (activeFilter === "All") {
+      return filtered.filter(b => b.booking_status?.toLowerCase() !== "cancelled");
+    }
+    
     return filtered.filter(booking =>
       booking.booking_status?.toLowerCase() === activeFilter.toLowerCase()
     );
@@ -81,9 +86,10 @@ function MyBookings() {
 
   const handleStatusUpdate = async (id, status) => {
     try {
-      await API.patch(`/api/bookings/${id}/status`, { status });
-      alert(`Booking ${status.toLowerCase()}!`);
+      await API.put(`/api/bookings/${id}/status`, { status });
+      // alert(`Booking ${status.toLowerCase()}ed!`);
       fetchBookings();
+      setShowPaymentModal(false);
     } catch (err) {
       console.error("Failed to update status", err);
       alert("Status update failed");
@@ -132,11 +138,68 @@ function MyBookings() {
           style={{ color: "#AAFF00" }}>
           Bookings
         </p>
-        <h1 className="text-3xl font-black text-white mt-1">My Bookings</h1>
-        <p className="text-sm mt-2" style={{ color: "#9CA3AF" }}>
-          Showing {filteredBookings.length} bookings
-        </p>
+        <h1 className="text-3xl font-black text-white mt-1">My Adventure Ledger</h1>
       </div>
+
+      {/* Payment Modal */}
+      {showPaymentModal && selectedBooking && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-[#1A2235] rounded-3xl border border-[#AAFF00]/20 max-w-lg w-full p-8 shadow-2xl overflow-hidden relative">
+             <div className="absolute top-0 left-0 w-full h-1 bg-[#AAFF00]"></div>
+             
+             <h2 className="text-2xl font-black text-white mb-2 uppercase tracking-tight">Finalize Reservation</h2>
+             <p className="text-xs text-gray-500 font-bold uppercase tracking-widest mb-8">Adventure Ledger Ref: {selectedBooking._id.slice(-6)}</p>
+
+             <div className="space-y-4 mb-8">
+                <div className="bg-[#0A0F1C] p-4 rounded-2xl border border-gray-800">
+                   <p className="text-[0.6rem] text-gray-500 font-bold uppercase mb-1">Target Expedition</p>
+                   <p className="text-white font-black text-lg">{selectedBooking.trek_schedule_id?.trek_id?.trek_name || selectedBooking.ride_id?.ride_name}</p>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                   <div className="bg-[#0A0F1C] p-4 rounded-2xl border border-gray-800">
+                      <p className="text-[0.6rem] text-gray-500 font-bold uppercase mb-1">Seats Reserved</p>
+                      <p className="text-white font-black text-xl">{selectedBooking.seats}</p>
+                   </div>
+                   <div className="bg-[#0A0F1C] p-4 rounded-2xl border border-gray-800">
+                      <p className="text-[0.6rem] text-gray-500 font-bold uppercase mb-1">Departure Date</p>
+                      <p className="text-white font-black">
+                         {new Date(selectedBooking.trek_schedule_id?.start_date || selectedBooking.ride_id?.departure_time).toLocaleDateString()}
+                      </p>
+                   </div>
+                </div>
+
+                <div className="bg-[#AAFF00]/10 p-6 rounded-2xl border border-[#AAFF00]/20">
+                   <div className="flex justify-between items-center text-[#AAFF00]">
+                      <span className="text-xs font-black uppercase tracking-widest">Balance Payable</span>
+                      <span className="text-3xl font-black">
+                         NPR {((selectedBooking.trek_schedule_id?.trek_id?.cost || selectedBooking.ride_id?.price || 0) * selectedBooking.seats).toLocaleString()}
+                      </span>
+                   </div>
+                </div>
+             </div>
+
+             <div className="grid grid-cols-2 gap-4">
+                <button
+                  onClick={() => setShowPaymentModal(false)}
+                  className="py-4 rounded-xl font-bold text-xs uppercase tracking-widest border border-gray-800 text-gray-500 hover:bg-gray-800 transition-all"
+                >
+                   Hold Off
+                </button>
+                <button
+                  onClick={() => handleStatusUpdate(selectedBooking._id, "Confirmed by Trekker")}
+                  className="py-4 rounded-xl font-black text-xs uppercase tracking-widest bg-[#AAFF00] text-[#0A0F1C] hover:bg-white transition-all transform active:scale-95 shadow-xl shadow-[#AAFF00]/20"
+                >
+                   Confirm & Start Payment
+                </button>
+             </div>
+          </div>
+        </div>
+      )}
+
+      <p className="text-sm mt-2" style={{ color: "#9CA3AF" }}>
+        Showing {filteredBookings.length} bookings
+      </p>
 
       {/* TYPE FILTERS (Trek and Ride Buttons) */}
       <div className="flex gap-4 mb-8 p-1 rounded-2xl w-fit" style={{ backgroundColor: "#1A2235", border: "1px solid #1F2937" }}>
@@ -319,7 +382,10 @@ function MyBookings() {
                    {booking.booking_status?.toLowerCase() === "pending" && (
                      <>
                        <button
-                         onClick={() => handleStatusUpdate(booking._id, "Confirmed by Trekker")}
+                         onClick={() => {
+                            setSelectedBooking(booking);
+                            setShowPaymentModal(true);
+                         }}
                          className="px-6 py-2 rounded-md text-sm font-semibold"
                          style={{
                            backgroundColor: "#AAFF00",

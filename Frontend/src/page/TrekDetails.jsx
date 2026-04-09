@@ -17,6 +17,7 @@ function TrekDetails() {
    const [newComment, setNewComment] = useState("");
    const [loading, setLoading] = useState(true);
    const [error, setError] = useState(null);
+   const [myBookings, setMyBookings] = useState([]);
 
    // Booking modal state
    const [showBookingModal, setShowBookingModal] = useState(false);
@@ -57,6 +58,13 @@ function TrekDetails() {
          // 4. Trek Reviews
          const reviewRes = await API.get(`/api/reviews/trek/${trekDbId}`);
          setReviews(reviewRes.data);
+
+         // 5. User's existing bookings (to prevent duplicates)
+         const token = localStorage.getItem("token");
+         if (token) {
+           const bookingRes = await API.get("/api/bookings/my");
+           setMyBookings(bookingRes.data);
+         }
 
       } catch (error) {
          console.error("Failed to load trek details", error);
@@ -408,12 +416,18 @@ function TrekDetails() {
                                     <p className="text-sm font-bold text-white mt-1">{sch.guide_id?.name || "Professional Guide"}</p>
                                  </div>
                                  <div className="text-right">
-                                    <button
-                                       onClick={() => handleJoinExpedition(sch)}
-                                       className="px-6 py-3 bg-[#AAFF00] text-black font-black uppercase text-[0.65rem] tracking-widest rounded-xl hover:bg-white transition-all transform active:scale-95 shadow-xl shadow-[#AAFF00]/5"
-                                    >
-                                       Join Expedition
-                                    </button>
+                                    {myBookings.some(b => b.trek_schedule_id?._id === sch._id && b.booking_status !== 'Cancelled') ? (
+                                       <button disabled className="px-6 py-3 bg-gray-800 text-gray-500 font-black uppercase text-[0.65rem] tracking-widest rounded-xl cursor-not-allowed">
+                                          Already Joined
+                                       </button>
+                                    ) : (
+                                       <button
+                                          onClick={() => handleJoinExpedition(sch)}
+                                          className="px-6 py-3 bg-[#AAFF00] text-black font-black uppercase text-[0.65rem] tracking-widest rounded-xl hover:bg-white transition-all transform active:scale-95 shadow-xl shadow-[#AAFF00]/5"
+                                       >
+                                          Join Expedition
+                                       </button>
+                                    )}
                                  </div>
                               </div>
                            </div>
@@ -451,12 +465,18 @@ function TrekDetails() {
                                     </div>
                                  </div>
                               </div>
-                              <button
-                                 onClick={() => openBookingModal(ride)}
-                                 className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-bold transition-all"
-                              >
-                                 Join Ride
-                              </button>
+                              {myBookings.some(b => b.ride_id?._id === ride._id && b.booking_status !== 'Cancelled') ? (
+                                 <button disabled className="bg-gray-800 text-gray-500 px-4 py-2 rounded-xl text-sm font-bold cursor-not-allowed">
+                                    Booked
+                                 </button>
+                              ) : (
+                                 <button
+                                    onClick={() => openBookingModal(ride)}
+                                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-bold transition-all"
+                                 >
+                                    Join Ride
+                                 </button>
+                              )}
                            </div>
                         ))}
                      </div>
