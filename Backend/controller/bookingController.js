@@ -57,7 +57,7 @@ export const createBooking = async (req, res) => {
 export const bookRide = async (req, res) => {
   try {
     const rideId = req.params.rideId;
-    const { seats } = req.body;
+    const { seats, seat_numbers } = req.body;
     const requestedSeats = Number(seats) || 1;
 
     const ride = await mongoose.model("Ride").findById(rideId);
@@ -69,15 +69,23 @@ export const bookRide = async (req, res) => {
       return res.status(400).json({ message: "Not enough seats available" });
     }
 
-    // Deduct seats
+    // Check if any seats are already booked
+    const alreadyBooked = seat_numbers.some(s => ride.booked_seats.includes(s));
+    if (alreadyBooked) {
+       return res.status(400).json({ message: "One or more selected seats are already booked." });
+    }
+
+    // Deduct seats and update booked_seats array
     ride.available_seats -= requestedSeats;
+    ride.booked_seats.push(...seat_numbers);
     await ride.save();
 
     // Create booking record
     const booking = new Booking({
       user_id: req.user.id,
       ride_id: ride._id,
-      seats: requestedSeats
+      seats: requestedSeats,
+      seat_numbers: seat_numbers
     });
 
     await booking.save();
@@ -193,10 +201,16 @@ export const cancelBooking = async (req, res) => {
           });
        }
     } else if (booking.ride_id) {
-       const ride = await mongoose.model("Ride").findById(booking.ride_id);
-       if (ride) {
-          ride.available_seats += booking.seats;
-          await ride.save();
+        const ride = await mongoose.model("Ride").findById(booking.ride_id);
+        if (ride) {
+           ride.available_seats += booking.seats;
+           
+           // Remove these specific seats from booked_seats
+           if (booking.seat_numbers && booking.seat_numbers.length > 0) {
+              ride.booked_seats = ride.booked_seats.filter(s => !booking.seat_numbers.includes(s));
+           }
+           
+           await ride.save();
 
           // Notification to vendor about cancellation
           await Notification.create({
@@ -218,6 +232,32 @@ export const cancelBooking = async (req, res) => {
     await booking.save();
     
     res.json(booking);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// PATCH /api/bookings/:id/status
+export const updateBookingStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    const booking = await Booking.findById(req.params.id);
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    booking.booking_status = status;
+    await booking.save();
+
+    // Create notification for the trekker
+    await Notification.create({
+      user_id: booking.user_id,
+      message: `Your booking status for ${booking.trek_schedule_id ? "trek" : "ride"} has been updated to "${status}".`,
+      type: "status_update"
+    });
+
+    res.json({ message: `Booking status updated to ${status}`, booking });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

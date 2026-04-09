@@ -17,7 +17,8 @@ const rideSchema = new mongoose.Schema({
   departure_time: { type: Date, required: true },
   price: { type: Number, required: true },
   total_seats: { type: Number, required: true },
-  available_seats: { type: Number, required: true }
+  available_seats: { type: Number, required: true },
+  booked_seats: { type: [Number], default: [] }
 }, { timestamps: true });
 
 export default mongoose.model("Ride", rideSchema);

@@ -27,10 +27,10 @@ const trekScheduleSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  total_seats: {          // ← ADD THIS
-  type: Number,
-  required: true
-},
+  total_seats: {
+    type: Number,
+    default: 0
+  }
 },
 { timestamps: true });
 

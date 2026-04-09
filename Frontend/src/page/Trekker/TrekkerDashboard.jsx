@@ -4,7 +4,7 @@ import DashboardLayout from "../../components/DashboardLayout";
 
 const menuItems = [
   { label: "Dashboard", icon: "🏠", path: "/trekker/dashboard" },
-  { label: "Browse Treks and Rides", icon: "🏔️", path: "/explore" },
+  { label: "Browse Treks and Rides", icon: "🏔️", path: "/trekker/explore" },
   { label: "My Bookings", icon: "📋", path: "/trekker/bookings" },
   { label: "Expense Tracker", icon: "💰", path: "/trekker/expenses" },
   { label: "My Profile", icon: "👤", path: "/trekker/profile" },
@@ -76,8 +76,8 @@ function TrekkerDashboard() {
           </h2>
           <div className="space-y-3">
             {[
-              { label: "🏔️ Browse Available Treks", path: "/explore", primary: true },
-              { label: "👥 Browse Trek Groups and Rides", path: "/trekker/groups", primary: false },
+              { label: "🏔️ Browse Available Treks", path: "/trekker/explore", primary: true },
+              { label: "🚗 Browse Shared Rides", path: "/trekker/explore", primary: false },
               { label: "📋 View My Bookings", path: "/trekker/bookings", primary: false },
               { label: "💰 Track Expenses", path: "/trekker/expenses", primary: false },
             ].map((action) => (
@@ -142,11 +142,11 @@ function TrekkerDashboard() {
             Start by browsing available treks
           </p>
           <button
-            onClick={() => navigate("/explore")}
+            onClick={() => navigate("/trekker/explore")}
             className="mt-4 px-6 py-2 rounded-md font-bold text-sm"
             style={{ backgroundColor: "#AAFF00", color: "#0A0F1C" }}
           >
-            Explore Treks
+            Explore Now
           </button>
         </div>
       </div>

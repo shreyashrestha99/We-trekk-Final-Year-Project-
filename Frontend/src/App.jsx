@@ -14,7 +14,7 @@ import TrekDetails from "./page/TrekDetails";
 import TrekkerDashboard from "./page/Trekker/TrekkerDashboard";
 import MyBookings from "./page/Trekker/MyBookings";
 import ExpenseTracker from "./page/Trekker/ExpenseTracker";
-import TrekkerGroups from "./page/Trekker/TrekkerGroups";
+import BrowseTreksRides from "./page/Trekker/BrowseTreksRides";
 import TrekkerProfile from "./page/Trekker/TrekkerProfile";
 
 // VENDOR
@@ -70,9 +70,9 @@ function App() {
           <ExpenseTracker />
         </ProtectedRoute>
       } />
-      <Route path="/trekker/groups" element={
+      <Route path="/trekker/explore" element={
         <ProtectedRoute allowedRoles={["Trekker"]}>
-          <TrekkerGroups />
+          <BrowseTreksRides />
         </ProtectedRoute>
       } />
       <Route path="/trekker/profile" element={

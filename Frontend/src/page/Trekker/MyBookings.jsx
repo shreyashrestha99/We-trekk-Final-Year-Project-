@@ -5,8 +5,7 @@ import API from "../../utils/axios";
 
 const menuItems = [
   { label: "Dashboard", icon: "🏠", path: "/trekker/dashboard" },
-  { label: "Browse Treks", icon: "🏔️", path: "/explore" },
-  { label: "Browse Groups", icon: "👥", path: "/trekker/groups" },
+  { label: "Browse Treks and Rides", icon: "🏔️", path: "/trekker/explore" },
   { label: "My Bookings", icon: "📋", path: "/trekker/bookings" },
   { label: "Expense Tracker", icon: "💰", path: "/trekker/expenses" },
   { label: "My Profile", icon: "👤", path: "/trekker/profile" },
@@ -16,8 +15,9 @@ function MyBookings() {
   const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeFilter, setActiveFilter] = useState("All");
   const [error, setError] = useState(null);
+  const [activeFilter, setActiveFilter] = useState("All");
+  const [activeType, setActiveType] = useState("All"); // "All", "Trek", "Ride"
 
   useEffect(() => {
     fetchBookings();
@@ -38,8 +38,18 @@ function MyBookings() {
   };
 
   const getFilteredBookings = () => {
-    if (activeFilter === "All") return bookings;
-    return bookings.filter(booking =>
+    let filtered = bookings;
+    
+    // Filter by Type (Trek/Ride)
+    if (activeType === "Trek") {
+      filtered = filtered.filter(b => b.trek_schedule_id);
+    } else if (activeType === "Ride") {
+      filtered = filtered.filter(b => b.ride_id);
+    }
+
+    // Filter by Status (Current activeFilter system)
+    if (activeFilter === "All") return filtered;
+    return filtered.filter(booking =>
       booking.booking_status?.toLowerCase() === activeFilter.toLowerCase()
     );
   };
@@ -112,16 +122,38 @@ function MyBookings() {
         </p>
         <h1 className="text-3xl font-black text-white mt-1">My Bookings</h1>
         <p className="text-sm mt-2" style={{ color: "#9CA3AF" }}>
-          {bookings.length} {bookings.length === 1 ? 'booking' : 'bookings'} total
+          Showing {filteredBookings.length} bookings
         </p>
+      </div>
+
+      {/* TYPE FILTERS (Trek and Ride Buttons) */}
+      <div className="flex gap-4 mb-8 p-1 rounded-2xl w-fit" style={{ backgroundColor: "#1A2235", border: "1px solid #1F2937" }}>
+        {["All", "Trek", "Ride"].map((type) => (
+          <button
+            key={type}
+            onClick={() => setActiveType(type)}
+            className="px-8 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+            style={{
+              backgroundColor: activeType === type ? "#AAFF00" : "transparent",
+              color: activeType === type ? "#0A0F1C" : "#9CA3AF"
+            }}
+          >
+            {type === "All" ? "All Bookings" : type === "Trek" ? "Trek Bookings" : "Ride Bookings"}
+          </button>
+        ))}
       </div>
 
       {/* FILTER TABS */}
       <div className="flex flex-wrap gap-2 mb-6">
         {["All", "Pending", "Confirmed", "Cancelled", "Completed"].map((tab) => {
           const count = tab === "All"
-            ? bookings.length
-            : bookings.filter(b => b.booking_status?.toLowerCase() === tab.toLowerCase()).length;
+            ? (activeType === "All" ? bookings.length : activeType === "Trek" ? bookings.filter(b => b.trek_schedule_id).length : bookings.filter(b => b.ride_id).length)
+            : (activeType === "All" 
+                ? bookings.filter(b => b.booking_status?.toLowerCase() === tab.toLowerCase()).length
+                : activeType === "Trek" 
+                  ? bookings.filter(b => b.trek_schedule_id && b.booking_status?.toLowerCase() === tab.toLowerCase()).length
+                  : bookings.filter(b => b.ride_id && b.booking_status?.toLowerCase() === tab.toLowerCase()).length
+              );
 
           return (
             <button
@@ -157,11 +189,11 @@ function MyBookings() {
           </p>
           {activeFilter === "All" && (
             <button
-              onClick={() => navigate("/explore")}
-              className="px-6 py-2 rounded-md font-bold"
-              style={{ backgroundColor: "#AAFF00", color: "#0A0F1C" }}
+               onClick={() => navigate("/trekker/explore")}
+               className="px-6 py-2 rounded-md font-bold"
+               style={{ backgroundColor: "#AAFF00", color: "#0A0F1C" }}
             >
-              Browse Treks
+              Browse Treks & Rides
             </button>
           )}
         </div>

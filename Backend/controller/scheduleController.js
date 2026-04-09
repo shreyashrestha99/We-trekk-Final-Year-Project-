@@ -38,7 +38,8 @@ export const createSchedule = async (req, res) => {
       date: startDate,
       start_date: startDate,
       end_date: endDate,
-      available_seats: Number(available_seats)
+      available_seats: Number(available_seats),
+      total_seats: Number(available_seats)
     });
     
     const createdSchedule = await schedule.save();

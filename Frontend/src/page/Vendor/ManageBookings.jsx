@@ -31,6 +31,17 @@ function ManageBookings() {
     }
   };
 
+  const handleStatusUpdate = async (id, status) => {
+    try {
+      await API.patch(`/api/bookings/${id}/status`, { status });
+      alert(`Booking ${status.toLowerCase()}ed!`);
+      fetchBookings();
+    } catch (error) {
+      console.error("Failed to update status", error);
+      alert("Status update failed");
+    }
+  };
+
   return (
     <DashboardLayout menuItems={menuItems}>
       <div className="mb-8 flex justify-between items-center">
@@ -57,6 +68,7 @@ function ManageBookings() {
                 <th className="px-6 py-4 border-b border-gray-800">Ride Details</th>
                 <th className="px-6 py-4 border-b border-gray-800">Seats</th>
                 <th className="px-6 py-4 border-b border-gray-800">Status</th>
+                <th className="px-6 py-4 border-b border-gray-800 text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -84,6 +96,34 @@ function ManageBookings() {
                     }`}>
                       {booking.booking_status}
                     </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex justify-center gap-2">
+                       {booking.booking_status === "Pending" && (
+                          <button 
+                             onClick={() => handleStatusUpdate(booking._id, "Confirmed")}
+                             className="px-3 py-1 bg-[#AAFF00] text-black text-[10px] font-bold uppercase rounded active:scale-95"
+                          >
+                             Confirm
+                          </button>
+                       )}
+                       {booking.booking_status === "Confirmed" && (
+                          <button 
+                             onClick={() => handleStatusUpdate(booking._id, "Completed")}
+                             className="px-3 py-1 bg-blue-600 text-white text-[10px] font-bold uppercase rounded active:scale-95"
+                          >
+                             Complete
+                          </button>
+                       )}
+                       {(booking.booking_status === "Pending" || booking.booking_status === "Confirmed") && (
+                          <button 
+                             onClick={() => handleStatusUpdate(booking._id, "Cancelled")}
+                             className="px-3 py-1 border border-red-500 text-red-500 text-[10px] font-bold uppercase rounded hover:bg-red-500 hover:text-white"
+                          >
+                             Cancel
+                          </button>
+                       )}
+                    </div>
                   </td>
                 </tr>
               ))}

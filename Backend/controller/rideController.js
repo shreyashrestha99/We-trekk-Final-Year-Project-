@@ -56,7 +56,23 @@ export const getRides = async (req, res) => {
       .populate("vendor_id", "name email phone profile_image")
       .populate("trek_id", "trek_name"); 
     
-    res.status(200).json(rides);
+    // Dynamically calculate booked_seats for each ride to ensure UI stays in sync
+    const ridesWithSeats = await Promise.all(rides.map(async (ride) => {
+       const activeBookings = await Booking.find({ 
+         ride_id: ride._id, 
+         booking_status: { $in: ["Pending", "Confirmed", "Completed"] } 
+       });
+       
+       // Combine all seat numbers from all active bookings
+       const bookedSeats = activeBookings.flatMap(b => b.seat_numbers || []);
+       
+       // Return ride object with updated booked_seats
+       const rideObj = ride.toObject();
+       rideObj.booked_seats = bookedSeats;
+       return rideObj;
+    }));
+    
+    res.status(200).json(ridesWithSeats);
   } catch (error) {
     console.error(`Get Rides Error: ${error.message}`);
     res.status(500).json({ message: "Failed to fetch rides" });

@@ -36,6 +36,10 @@ const bookingSchema = new mongoose.Schema({
   dispute_reason: {
     type: String,
     default: ""
+  },
+  seat_numbers: {
+    type: [Number],
+    default: []
   }
 }, { timestamps: true });
 

@@ -232,12 +232,13 @@ function TrekDetails() {
                                  className="h-12 rounded-xl text-sm font-black transition-all"
                                  style={{
                                     backgroundColor: isBooked
-                                       ? "#374151"
+                                       ? "#EF4444"
                                        : isSelected
                                        ? "#AAFF00"
                                        : "#1A2235",
-                                    color: isBooked ? "#6B7280" : isSelected ? "#000" : "#D1D5DB",
-                                    cursor: isBooked ? "not-allowed" : "pointer"
+                                    color: isBooked ? "#FFFFFF" : isSelected ? "#000" : "#D1D5DB",
+                                    cursor: isBooked ? "not-allowed" : "pointer",
+                                    border: isBooked ? "1px solid #7F1D1D" : "1px solid #374151"
                                  }}
                               >
                                  {seatNumber}

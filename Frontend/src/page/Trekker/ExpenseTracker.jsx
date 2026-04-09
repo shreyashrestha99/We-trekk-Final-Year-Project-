@@ -6,7 +6,7 @@ import autoTable from "jspdf-autotable";
 
 const menuItems = [
   { label: "Dashboard", icon: "🏠", path: "/trekker/dashboard" },
-  { label: "Browse Treks and Rides", icon: "🏔️", path: "/explore" },
+  { label: "Browse Treks and Rides", icon: "🏔️", path: "/trekker/explore" },
   { label: "My Bookings", icon: "📋", path: "/trekker/bookings" },
   { label: "Expense Tracker", icon: "💰", path: "/trekker/expenses" },
   { label: "My Profile", icon: "👤", path: "/trekker/profile" },
