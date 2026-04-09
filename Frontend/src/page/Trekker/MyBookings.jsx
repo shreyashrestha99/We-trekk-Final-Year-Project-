@@ -27,7 +27,7 @@ function MyBookings() {
     setLoading(true);
     setError(null);
     try {
-      const response = await API.get("/api/bookings/my-bookings");
+      const response = await API.get("/api/bookings/my");
       setBookings(response.data);
     } catch (err) {
       console.error("Failed to fetch bookings:", err);
@@ -40,7 +40,7 @@ function MyBookings() {
   const getFilteredBookings = () => {
     if (activeFilter === "All") return bookings;
     return bookings.filter(booking =>
-      booking.status?.toLowerCase() === activeFilter.toLowerCase()
+      booking.booking_status?.toLowerCase() === activeFilter.toLowerCase()
     );
   };
 
@@ -60,7 +60,7 @@ function MyBookings() {
     }
 
     try {
-      await API.patch(`/api/bookings/${bookingId}/cancel`);
+      await API.put(`/api/bookings/${bookingId}/cancel`);
       alert("Booking cancelled successfully");
       fetchBookings(); // Refresh the list
     } catch (err) {
@@ -121,7 +121,7 @@ function MyBookings() {
         {["All", "Pending", "Confirmed", "Cancelled", "Completed"].map((tab) => {
           const count = tab === "All"
             ? bookings.length
-            : bookings.filter(b => b.status?.toLowerCase() === tab.toLowerCase()).length;
+            : bookings.filter(b => b.booking_status?.toLowerCase() === tab.toLowerCase()).length;
 
           return (
             <button
@@ -168,7 +168,7 @@ function MyBookings() {
       ) : (
         <div className="grid gap-4">
           {filteredBookings.map((booking) => {
-            const statusColors = getStatusColor(booking.status);
+            const statusColors = getStatusColor(booking.booking_status);
 
             return (
               <div
@@ -180,7 +180,7 @@ function MyBookings() {
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <h3 className="text-xl font-black text-white">
-                      {booking.schedule_id?.trek_id?.trek_name || booking.ride_id?.trek_id?.trek_name || "Unknown Trek"}
+                      {booking.trek_schedule_id?.trek_id?.trek_name || booking.ride_id?.ride_name || "Unknown Item"}
                     </h3>
                     <p className="text-xs mt-1" style={{ color: "#6B7280" }}>
                       Booking ID: {booking._id?.slice(-8).toUpperCase()}
@@ -194,7 +194,7 @@ function MyBookings() {
                       border: `1px solid ${statusColors.border}`
                     }}
                   >
-                    {booking.status}
+                    {booking.booking_status}
                   </span>
                 </div>
 
@@ -205,18 +205,18 @@ function MyBookings() {
                       Type
                     </p>
                     <p className="text-sm font-bold text-white mt-1">
-                      {booking.booking_type === "schedule" ? "🗓️ Guided Trek" : "🚗 Transport"}
+                      {booking.trek_schedule_id ? "🗓️ Guided Trek" : "🚗 Transport"}
                     </p>
                   </div>
 
-                  {booking.schedule_id && (
+                  {booking.trek_schedule_id && (
                     <>
                       <div className="p-3 rounded-lg" style={{ backgroundColor: "#0A0F1C" }}>
                         <p className="text-[0.6rem] font-bold uppercase tracking-wider" style={{ color: "#6B7280" }}>
                           Start Date
                         </p>
                         <p className="text-sm font-bold text-white mt-1">
-                          {new Date(booking.schedule_id.start_date).toLocaleDateString()}
+                          {new Date(booking.trek_schedule_id.start_date).toLocaleDateString()}
                         </p>
                       </div>
                       <div className="p-3 rounded-lg" style={{ backgroundColor: "#0A0F1C" }}>
@@ -224,7 +224,7 @@ function MyBookings() {
                           Guide
                         </p>
                         <p className="text-sm font-bold text-white mt-1">
-                          {booking.schedule_id.guide_id?.name || "TBD"}
+                          {booking.trek_schedule_id.guide_id?.name || "TBD"}
                         </p>
                       </div>
                     </>
@@ -245,7 +245,7 @@ function MyBookings() {
                           Seats Booked
                         </p>
                         <p className="text-sm font-bold text-white mt-1">
-                          {booking.seats_booked || 1}
+                          {booking.seats || 1}
                         </p>
                       </div>
                     </>
@@ -256,7 +256,7 @@ function MyBookings() {
                       Total Amount
                     </p>
                     <p className="text-sm font-bold mt-1" style={{ color: "#AAFF00" }}>
-                      NPR {booking.total_amount?.toLocaleString() || "0"}
+                      NPR {((booking.trek_schedule_id?.trek_id?.cost || booking.ride_id?.price || 0) * (booking.seats || 1)).toLocaleString()}
                     </p>
                   </div>
                 </div>
@@ -264,14 +264,14 @@ function MyBookings() {
                 {/* Actions */}
                 <div className="flex gap-3 pt-4 border-t" style={{ borderColor: "#1F2937" }}>
                   <button
-                    onClick={() => navigate(`/trek/${booking.schedule_id?.trek_id?._id || booking.ride_id?.trek_id?._id}`)}
+                    onClick={() => navigate(`/trek/${booking.trek_schedule_id?.trek_id?._id || booking.ride_id?.trek_id}`)}
                     className="flex-1 py-2 rounded-md text-sm font-semibold"
                     style={{ border: "1px solid #1F2937", color: "#9CA3AF" }}
                   >
                     View Trek Details
                   </button>
 
-                  {booking.status?.toLowerCase() === "pending" && (
+                  {booking.booking_status?.toLowerCase() === "pending" && (
                     <button
                       onClick={() => handleCancelBooking(booking._id)}
                       className="px-6 py-2 rounded-md text-sm font-semibold"

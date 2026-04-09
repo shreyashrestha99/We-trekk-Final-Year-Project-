@@ -23,6 +23,11 @@ function TrekDetails() {
    const [selectedRide, setSelectedRide] = useState(null);
    const [selectedSeats, setSelectedSeats] = useState([]);
 
+   // Trek booking state
+   const [showTrekModal, setShowTrekModal] = useState(false);
+   const [selectedSchedule, setSelectedSchedule] = useState(null);
+   const [trekSeats, setTrekSeats] = useState(1);
+
    const totalSeats = selectedRide?.total_seats || 12;
    const bookedSeats = selectedRide?.booked_seats || [];
 
@@ -92,6 +97,34 @@ function TrekDetails() {
          alert(`Successfully booked ${selectedSeats.length} seat(s)!`);
          setShowBookingModal(false);
          fetchDetails(); // Refresh to update available seats
+      } catch (error) {
+         alert(error.response?.data?.message || "Booking failed. Please try again.");
+      }
+   };
+
+   const handleJoinExpedition = (sch) => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+         alert("Please login to join an expedition.");
+         navigate("/login");
+         return;
+      }
+      setSelectedSchedule(sch);
+      setTrekSeats(1);
+      setShowTrekModal(true);
+   };
+
+   const handleConfirmTrekBooking = async () => {
+      if (!selectedSchedule) return;
+
+      try {
+         await API.post("/api/bookings", {
+            trek_schedule_id: selectedSchedule._id,
+            seats: trekSeats
+         });
+         alert("Successfully joined the expedition!");
+         setShowTrekModal(false);
+         navigate("/trekker/bookings");
       } catch (error) {
          alert(error.response?.data?.message || "Booking failed. Please try again.");
       }
@@ -240,6 +273,65 @@ function TrekDetails() {
                </div>
             </div>
          )}
+         {/* TREK BOOKING MODAL */}
+         {showTrekModal && selectedSchedule && (
+            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+               <div className="bg-[#1A2235] rounded-2xl border border-gray-800 max-w-md w-full p-7 shadow-2xl">
+                  <h3 className="text-2xl font-black text-white mb-5">Join Expedition</h3>
+                  
+                  <div className="bg-[#0A0F1C] p-5 rounded-2xl mb-6 border border-gray-800">
+                     <p className="text-xs text-gray-500 font-bold uppercase tracking-widest mb-1">Departure Date</p>
+                     <p className="text-lg font-black text-white">{new Date(selectedSchedule.start_date).toLocaleDateString()}</p>
+                     <p className="text-xs text-[#AAFF00] mt-4 font-bold uppercase">{selectedSchedule.available_seats} Seats Available</p>
+                  </div>
+
+                  <div className="mb-6">
+                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Number of Trekkers</p>
+                     <div className="flex items-center gap-4 bg-[#0A0F1C] p-2 rounded-xl border border-gray-800">
+                        <button 
+                           onClick={() => setTrekSeats(Math.max(1, trekSeats - 1))}
+                           className="w-10 h-10 rounded-lg bg-gray-800 text-white font-bold hover:bg-gray-700 transition-all"
+                        >
+                           -
+                        </button>
+                        <span className="flex-1 text-center font-black text-xl text-white">{trekSeats}</span>
+                        <button 
+                           onClick={() => setTrekSeats(Math.min(selectedSchedule.available_seats, trekSeats + 1))}
+                           className="w-10 h-10 rounded-lg bg-[#AAFF00] text-black font-bold hover:bg-white transition-all"
+                        >
+                           +
+                        </button>
+                     </div>
+                  </div>
+
+                  <div className="bg-[#111827] p-5 rounded-2xl mb-6 border border-gray-800">
+                     <div className="flex justify-between items-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">
+                        <span>Per Person</span>
+                        <span className="text-white">Rs. {trek.cost.toLocaleString()}</span>
+                     </div>
+                     <div className="flex justify-between items-center border-t border-gray-800 pt-3">
+                        <span className="text-sm text-gray-400 font-bold">Total Investment</span>
+                        <span className="text-2xl font-black text-[#AAFF00]">Rs. {(trek.cost * trekSeats).toLocaleString()}</span>
+                     </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                     <button
+                        onClick={() => setShowTrekModal(false)}
+                        className="py-3 rounded-2xl font-bold text-sm border border-gray-800 text-gray-400 hover:bg-gray-800 transition-all font-black uppercase"
+                     >
+                        Abort
+                     </button>
+                     <button
+                        onClick={handleConfirmTrekBooking}
+                        className="py-3 rounded-2xl font-bold text-sm bg-[#AAFF00] text-black hover:bg-white transition-all font-black uppercase"
+                     >
+                        Confirm Booking
+                     </button>
+                  </div>
+               </div>
+            </div>
+         )}
 
          {/* HERO SECTION */}
          <div className="relative h-[40vh] overflow-hidden border-b border-gray-800">
@@ -316,7 +408,7 @@ function TrekDetails() {
                                  </div>
                                  <div className="text-right">
                                     <button
-                                       onClick={() => navigate("/trekker/bookings", { state: { scheduleId: sch._id } })}
+                                       onClick={() => handleJoinExpedition(sch)}
                                        className="px-6 py-3 bg-[#AAFF00] text-black font-black uppercase text-[0.65rem] tracking-widest rounded-xl hover:bg-white transition-all transform active:scale-95 shadow-xl shadow-[#AAFF00]/5"
                                     >
                                        Join Expedition

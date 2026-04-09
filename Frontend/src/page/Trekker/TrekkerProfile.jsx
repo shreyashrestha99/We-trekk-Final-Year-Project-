@@ -4,8 +4,7 @@ import DashboardLayout from "../../components/DashboardLayout";
 
 const menuItems = [
   { label: "Dashboard", icon: "🏠", path: "/trekker/dashboard" },
-  { label: "Browse Treks", icon: "🏔️", path: "/explore" },
-  { label: "Browse Groups", icon: "👥", path: "/trekker/groups" },
+  { label: "Browse Treks and Rides", icon: "🏔️", path: "/explore" },
   { label: "My Bookings", icon: "📋", path: "/trekker/bookings" },
   { label: "Expense Tracker", icon: "💰", path: "/trekker/expenses" },
   { label: "My Profile", icon: "👤", path: "/trekker/profile" },

@@ -4,8 +4,7 @@ import DashboardLayout from "../../components/DashboardLayout";
 
 const menuItems = [
   { label: "Dashboard", icon: "🏠", path: "/trekker/dashboard" },
-  { label: "Browse Treks", icon: "🏔️", path: "/explore" },
-  { label: "Browse Groups", icon: "👥", path: "/trekker/groups" },
+  { label: "Browse Treks and Rides", icon: "🏔️", path: "/explore" },
   { label: "My Bookings", icon: "📋", path: "/trekker/bookings" },
   { label: "Expense Tracker", icon: "💰", path: "/trekker/expenses" },
   { label: "My Profile", icon: "👤", path: "/trekker/profile" },
@@ -78,7 +77,7 @@ function TrekkerDashboard() {
           <div className="space-y-3">
             {[
               { label: "🏔️ Browse Available Treks", path: "/explore", primary: true },
-              { label: "👥 Browse Trek Groups", path: "/trekker/groups", primary: false },
+              { label: "👥 Browse Trek Groups and Rides", path: "/trekker/groups", primary: false },
               { label: "📋 View My Bookings", path: "/trekker/bookings", primary: false },
               { label: "💰 Track Expenses", path: "/trekker/expenses", primary: false },
             ].map((action) => (

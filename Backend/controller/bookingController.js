@@ -111,7 +111,10 @@ export const getMyBookings = async (req, res) => {
          path: "trek_schedule_id",
          populate: { path: "trek_id" }
       })
-      .populate("ride_id")
+      .populate({
+         path: "ride_id",
+         populate: { path: "trek_id" }
+      })
       .sort({ createdAt: -1 });
 
     res.json(bookings);
