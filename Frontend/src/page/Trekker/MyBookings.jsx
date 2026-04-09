@@ -1,5 +1,7 @@
+import { useState, useEffect } from "react";
 import DashboardLayout from "../../components/DashboardLayout";
 import { useNavigate } from "react-router-dom";
+import API from "../../utils/axios";
 
 const menuItems = [
   { label: "Dashboard", icon: "🏠", path: "/trekker/dashboard" },
@@ -12,6 +14,94 @@ const menuItems = [
 
 function MyBookings() {
   const navigate = useNavigate();
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeFilter, setActiveFilter] = useState("All");
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchBookings();
+  }, []);
+
+  const fetchBookings = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await API.get("/api/bookings/my-bookings");
+      setBookings(response.data);
+    } catch (err) {
+      console.error("Failed to fetch bookings:", err);
+      setError("Failed to load bookings. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getFilteredBookings = () => {
+    if (activeFilter === "All") return bookings;
+    return bookings.filter(booking =>
+      booking.status?.toLowerCase() === activeFilter.toLowerCase()
+    );
+  };
+
+  const getStatusColor = (status) => {
+    const colors = {
+      pending: { bg: "#F59E0B20", text: "#F59E0B", border: "#F59E0B40" },
+      confirmed: { bg: "#34D39920", text: "#34D399", border: "#34D39940" },
+      cancelled: { bg: "#EF444420", text: "#EF4444", border: "#EF444440" },
+      completed: { bg: "#60A5FA20", text: "#60A5FA", border: "#60A5FA40" }
+    };
+    return colors[status?.toLowerCase()] || colors.pending;
+  };
+
+  const handleCancelBooking = async (bookingId) => {
+    if (!window.confirm("Are you sure you want to cancel this booking?")) {
+      return;
+    }
+
+    try {
+      await API.patch(`/api/bookings/${bookingId}/cancel`);
+      alert("Booking cancelled successfully");
+      fetchBookings(); // Refresh the list
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to cancel booking");
+    }
+  };
+
+  const filteredBookings = getFilteredBookings();
+
+  if (loading) {
+    return (
+      <DashboardLayout menuItems={menuItems}>
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <div className="animate-spin text-6xl mb-4">⛰️</div>
+            <p className="text-sm font-bold" style={{ color: "#9CA3AF" }}>
+              Loading your bookings...
+            </p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout menuItems={menuItems}>
+        <div className="flex flex-col items-center justify-center py-20">
+          <p className="text-5xl mb-4">⚠️</p>
+          <p className="text-white font-bold mb-4">{error}</p>
+          <button
+            onClick={fetchBookings}
+            className="px-6 py-2 rounded-md font-bold"
+            style={{ backgroundColor: "#AAFF00", color: "#0A0F1C" }}
+          >
+            Retry
+          </button>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout menuItems={menuItems}>
@@ -21,43 +111,190 @@ function MyBookings() {
           Bookings
         </p>
         <h1 className="text-3xl font-black text-white mt-1">My Bookings</h1>
+        <p className="text-sm mt-2" style={{ color: "#9CA3AF" }}>
+          {bookings.length} {bookings.length === 1 ? 'booking' : 'bookings'} total
+        </p>
       </div>
 
       {/* FILTER TABS */}
-      <div className="flex space-x-2 mb-6">
-        {["All", "Pending", "Confirmed", "Cancelled"].map((tab) => (
-          <button
-            key={tab}
-            className="px-4 py-2 rounded-md text-sm font-semibold"
-            style={{
-              backgroundColor: tab === "All" ? "#AAFF00" : "#1A2235",
-              color: tab === "All" ? "#0A0F1C" : "#9CA3AF",
-              border: "1px solid #1F2937"
-            }}
-          >
-            {tab}
-          </button>
-        ))}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {["All", "Pending", "Confirmed", "Cancelled", "Completed"].map((tab) => {
+          const count = tab === "All"
+            ? bookings.length
+            : bookings.filter(b => b.status?.toLowerCase() === tab.toLowerCase()).length;
+
+          return (
+            <button
+              key={tab}
+              onClick={() => setActiveFilter(tab)}
+              className="px-4 py-2 rounded-md text-sm font-semibold transition-all"
+              style={{
+                backgroundColor: tab === activeFilter ? "#AAFF00" : "#1A2235",
+                color: tab === activeFilter ? "#0A0F1C" : "#9CA3AF",
+                border: "1px solid #1F2937"
+              }}
+            >
+              {tab} {count > 0 && `(${count})`}
+            </button>
+          );
+        })}
       </div>
 
-      {/* EMPTY STATE */}
-      <div
-        className="p-12 rounded-xl text-center"
-        style={{ backgroundColor: "#1A2235", border: "1px solid #1F2937" }}
-      >
-        <p className="text-5xl mb-4">📋</p>
-        <p className="text-white font-bold text-xl">No bookings yet!</p>
-        <p className="text-sm mt-2 mb-6" style={{ color: "#9CA3AF" }}>
-          Browse available treks and make your first booking
-        </p>
-        <button
-          onClick={() => navigate("/explore")}
-          className="px-6 py-2 rounded-md font-bold"
-          style={{ backgroundColor: "#AAFF00", color: "#0A0F1C" }}
+      {/* BOOKINGS LIST */}
+      {filteredBookings.length === 0 ? (
+        <div
+          className="p-12 rounded-xl text-center"
+          style={{ backgroundColor: "#1A2235", border: "1px solid #1F2937" }}
         >
-          Browse Treks
-        </button>
-      </div>
+          <p className="text-5xl mb-4">📋</p>
+          <p className="text-white font-bold text-xl">
+            {activeFilter === "All" ? "No bookings yet!" : `No ${activeFilter.toLowerCase()} bookings`}
+          </p>
+          <p className="text-sm mt-2 mb-6" style={{ color: "#9CA3AF" }}>
+            {activeFilter === "All"
+              ? "Browse available treks and make your first booking"
+              : "Try selecting a different filter"}
+          </p>
+          {activeFilter === "All" && (
+            <button
+              onClick={() => navigate("/explore")}
+              className="px-6 py-2 rounded-md font-bold"
+              style={{ backgroundColor: "#AAFF00", color: "#0A0F1C" }}
+            >
+              Browse Treks
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="grid gap-4">
+          {filteredBookings.map((booking) => {
+            const statusColors = getStatusColor(booking.status);
+
+            return (
+              <div
+                key={booking._id}
+                className="p-6 rounded-xl transition-all hover:shadow-lg"
+                style={{ backgroundColor: "#1A2235", border: "1px solid #1F2937" }}
+              >
+                {/* Header */}
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="text-xl font-black text-white">
+                      {booking.schedule_id?.trek_id?.trek_name || booking.ride_id?.trek_id?.trek_name || "Unknown Trek"}
+                    </h3>
+                    <p className="text-xs mt-1" style={{ color: "#6B7280" }}>
+                      Booking ID: {booking._id?.slice(-8).toUpperCase()}
+                    </p>
+                  </div>
+                  <span
+                    className="px-3 py-1 rounded-full text-xs font-black uppercase"
+                    style={{
+                      backgroundColor: statusColors.bg,
+                      color: statusColors.text,
+                      border: `1px solid ${statusColors.border}`
+                    }}
+                  >
+                    {booking.status}
+                  </span>
+                </div>
+
+                {/* Details Grid */}
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                  <div className="p-3 rounded-lg" style={{ backgroundColor: "#0A0F1C" }}>
+                    <p className="text-[0.6rem] font-bold uppercase tracking-wider" style={{ color: "#6B7280" }}>
+                      Type
+                    </p>
+                    <p className="text-sm font-bold text-white mt-1">
+                      {booking.booking_type === "schedule" ? "🗓️ Guided Trek" : "🚗 Transport"}
+                    </p>
+                  </div>
+
+                  {booking.schedule_id && (
+                    <>
+                      <div className="p-3 rounded-lg" style={{ backgroundColor: "#0A0F1C" }}>
+                        <p className="text-[0.6rem] font-bold uppercase tracking-wider" style={{ color: "#6B7280" }}>
+                          Start Date
+                        </p>
+                        <p className="text-sm font-bold text-white mt-1">
+                          {new Date(booking.schedule_id.start_date).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="p-3 rounded-lg" style={{ backgroundColor: "#0A0F1C" }}>
+                        <p className="text-[0.6rem] font-bold uppercase tracking-wider" style={{ color: "#6B7280" }}>
+                          Guide
+                        </p>
+                        <p className="text-sm font-bold text-white mt-1">
+                          {booking.schedule_id.guide_id?.name || "TBD"}
+                        </p>
+                      </div>
+                    </>
+                  )}
+
+                  {booking.ride_id && (
+                    <>
+                      <div className="p-3 rounded-lg" style={{ backgroundColor: "#0A0F1C" }}>
+                        <p className="text-[0.6rem] font-bold uppercase tracking-wider" style={{ color: "#6B7280" }}>
+                          Route
+                        </p>
+                        <p className="text-sm font-bold text-white mt-1">
+                          {booking.ride_id.pickup_location} → {booking.ride_id.drop_location}
+                        </p>
+                      </div>
+                      <div className="p-3 rounded-lg" style={{ backgroundColor: "#0A0F1C" }}>
+                        <p className="text-[0.6rem] font-bold uppercase tracking-wider" style={{ color: "#6B7280" }}>
+                          Seats Booked
+                        </p>
+                        <p className="text-sm font-bold text-white mt-1">
+                          {booking.seats_booked || 1}
+                        </p>
+                      </div>
+                    </>
+                  )}
+
+                  <div className="p-3 rounded-lg" style={{ backgroundColor: "#0A0F1C" }}>
+                    <p className="text-[0.6rem] font-bold uppercase tracking-wider" style={{ color: "#6B7280" }}>
+                      Total Amount
+                    </p>
+                    <p className="text-sm font-bold mt-1" style={{ color: "#AAFF00" }}>
+                      NPR {booking.total_amount?.toLocaleString() || "0"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-3 pt-4 border-t" style={{ borderColor: "#1F2937" }}>
+                  <button
+                    onClick={() => navigate(`/trek/${booking.schedule_id?.trek_id?._id || booking.ride_id?.trek_id?._id}`)}
+                    className="flex-1 py-2 rounded-md text-sm font-semibold"
+                    style={{ border: "1px solid #1F2937", color: "#9CA3AF" }}
+                  >
+                    View Trek Details
+                  </button>
+
+                  {booking.status?.toLowerCase() === "pending" && (
+                    <button
+                      onClick={() => handleCancelBooking(booking._id)}
+                      className="px-6 py-2 rounded-md text-sm font-semibold"
+                      style={{
+                        backgroundColor: "#EF444420",
+                        color: "#EF4444",
+                        border: "1px solid #EF444440"
+                      }}
+                    >
+                      Cancel Booking
+                    </button>
+                  )}
+                </div>
+
+                {/* Booking Date */}
+                <p className="text-xs mt-3" style={{ color: "#4B5563" }}>
+                  Booked on {new Date(booking.createdAt || booking.booking_date).toLocaleString()}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </DashboardLayout>
   );
 }

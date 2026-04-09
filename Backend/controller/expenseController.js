@@ -28,9 +28,19 @@ export const getMyExpenses = async (req, res) => {
 export const generateReport = async (req, res) => {
   try {
     const expenses = await Expense.find({ trekker_id: req.user.id });
-    
+
     // TODO: Implement PDF generation
     res.json({ message: "PDF Report generated", expenses });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// DELETE /api/expenses/:id
+export const deleteExpense = async (req, res) => {
+  try {
+    await Expense.findByIdAndDelete(req.params.id);
+    res.json({ message: "Expense deleted" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
