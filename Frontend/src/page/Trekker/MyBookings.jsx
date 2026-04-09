@@ -57,6 +57,7 @@ function MyBookings() {
   const getStatusColor = (status) => {
     const colors = {
       pending: { bg: "#F59E0B20", text: "#F59E0B", border: "#F59E0B40" },
+      "confirmed by trekker": { bg: "#AAFF0020", text: "#AAFF00", border: "#AAFF0040" },
       confirmed: { bg: "#34D39920", text: "#34D399", border: "#34D39940" },
       cancelled: { bg: "#EF444420", text: "#EF4444", border: "#EF444440" },
       completed: { bg: "#60A5FA20", text: "#60A5FA", border: "#60A5FA40" }
@@ -75,6 +76,17 @@ function MyBookings() {
       fetchBookings(); // Refresh the list
     } catch (err) {
       alert(err.response?.data?.message || "Failed to cancel booking");
+    }
+  };
+
+  const handleStatusUpdate = async (id, status) => {
+    try {
+      await API.patch(`/api/bookings/${id}/status`, { status });
+      alert(`Booking ${status.toLowerCase()}!`);
+      fetchBookings();
+    } catch (err) {
+      console.error("Failed to update status", err);
+      alert("Status update failed");
     }
   };
 
@@ -298,24 +310,44 @@ function MyBookings() {
                   <button
                     onClick={() => navigate(`/trek/${booking.trek_schedule_id?.trek_id?._id || booking.ride_id?.trek_id}`)}
                     className="flex-1 py-2 rounded-md text-sm font-semibold"
+            className="flex-1 py-2 rounded-md text-sm font-semibold"
                     style={{ border: "1px solid #1F2937", color: "#9CA3AF" }}
                   >
                     View Trek Details
                   </button>
 
-                  {booking.booking_status?.toLowerCase() === "pending" && (
-                    <button
-                      onClick={() => handleCancelBooking(booking._id)}
-                      className="px-6 py-2 rounded-md text-sm font-semibold"
-                      style={{
-                        backgroundColor: "#EF444420",
-                        color: "#EF4444",
-                        border: "1px solid #EF444440"
-                      }}
-                    >
-                      Cancel Booking
-                    </button>
-                  )}
+                   {booking.booking_status?.toLowerCase() === "pending" && (
+                     <>
+                       <button
+                         onClick={() => handleStatusUpdate(booking._id, "Confirmed by Trekker")}
+                         className="px-6 py-2 rounded-md text-sm font-semibold"
+                         style={{
+                           backgroundColor: "#AAFF00",
+                           color: "#0A0F1C"
+                         }}
+                       >
+                         Confirm Booking
+                       </button>
+                       <button
+                         onClick={() => handleCancelBooking(booking._id)}
+                         className="px-6 py-2 rounded-md text-sm font-semibold"
+                         style={{
+                           backgroundColor: "#EF444420",
+                           color: "#EF4444",
+                           border: "1px solid #EF444440"
+                         }}
+                       >
+                         Cancel Booking
+                       </button>
+                     </>
+                   )}
+
+                   {booking.booking_status === "Confirmed by Trekker" && (
+                     <p className="text-xs font-bold text-gray-500 italic flex items-center">
+                        ⏳ Awaiting Guide/Vendor Confirmation
+                     </p>
+                   )}
+
                 </div>
 
                 {/* Booking Date */}

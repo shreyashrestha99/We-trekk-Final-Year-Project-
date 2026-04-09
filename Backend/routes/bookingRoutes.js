@@ -21,6 +21,6 @@ router.route("/:id/cancel")
   .put(protect, authorize("Trekker", "Admin"), cancelBooking);
 
 router.route("/:id/status")
-  .patch(protect, authorize("Guide", "LocalVendor", "Admin"), updateBookingStatus);
+  .patch(protect, authorize("Trekker", "Guide", "LocalVendor", "Admin"), updateBookingStatus);
 
 export default router;
