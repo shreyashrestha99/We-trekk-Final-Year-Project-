@@ -272,12 +272,36 @@ export const updateBookingStatus = async (req, res) => {
     booking.booking_status = status;
     await booking.save();
 
-    // Create notification for the trekker
+    // COORDINATED NOTIFICATIONS
+    let trekkerMsg = "";
+    let providerMsg = "";
+
+    if (status === "Awaiting Payment") {
+      trekkerMsg = `Good news! Your reservation for ${booking.trek_schedule_id ? "trek" : "ride"} has been approved. Please complete the payment to secure your spot.`;
+      providerMsg = `You have accepted the booking request. We've notified the trekker to proceed with payment.`;
+    } else if (status === "Confirmed") {
+      trekkerMsg = `Payment successful! Your reservation is now officially secured. See you on the trail!`;
+      providerMsg = `Payment received! The booking for ${booking.trek_schedule_id ? "trek" : "ride"} is now fully confirmed and secured in your roster.`;
+    } else {
+      trekkerMsg = `Your booking status for ${booking.trek_schedule_id ? "trek" : "ride"} has been updated to "${status}".`;
+    }
+
+    // Notify Trekker
     await Notification.create({
       user_id: booking.user_id,
-      message: `Your booking status for ${booking.trek_schedule_id ? "trek" : "ride"} has been updated to "${status}".`,
+      message: trekkerMsg,
       type: "status_update"
     });
+
+    // Notify Provider (Guide or Vendor)
+    const providerId = booking.trek_schedule_id?.guide_id || booking.ride_id?.vendor_id;
+    if (providerId && providerMsg) {
+      await Notification.create({
+        user_id: providerId,
+        message: providerMsg,
+        type: "status_update"
+      });
+    }
 
     res.json({ message: `Booking status updated to ${status}`, booking });
   } catch (error) {

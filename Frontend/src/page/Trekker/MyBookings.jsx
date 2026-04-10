@@ -62,7 +62,7 @@ function MyBookings() {
   const getStatusColor = (status) => {
     const colors = {
       pending: { bg: "#F59E0B20", text: "#F59E0B", border: "#F59E0B40" },
-      "confirmed by trekker": { bg: "#AAFF0020", text: "#AAFF00", border: "#AAFF0040" },
+      "awaiting payment": { bg: "#AAFF0020", text: "#AAFF00", border: "#AAFF0040" },
       confirmed: { bg: "#34D39920", text: "#34D399", border: "#34D39940" },
       cancelled: { bg: "#EF444420", text: "#EF4444", border: "#EF444440" },
       completed: { bg: "#60A5FA20", text: "#60A5FA", border: "#60A5FA40" }
@@ -186,12 +186,12 @@ function MyBookings() {
                 >
                    Hold Off
                 </button>
-                <button
-                  onClick={() => handleStatusUpdate(selectedBooking._id, "Confirmed by Trekker")}
-                  className="py-4 rounded-xl font-black text-xs uppercase tracking-widest bg-[#AAFF00] text-[#0A0F1C] hover:bg-white transition-all transform active:scale-95 shadow-xl shadow-[#AAFF00]/20"
-                >
-                   Confirm & Start Payment
-                </button>
+                 <button
+                   onClick={() => handleStatusUpdate(selectedBooking._id, "Confirmed")}
+                   className="py-4 rounded-xl font-black text-xs uppercase tracking-widest bg-[#AAFF00] text-[#0A0F1C] hover:bg-white transition-all transform active:scale-95 shadow-xl shadow-[#AAFF00]/20"
+                 >
+                    Pay & Secure Spot
+                 </button>
              </div>
           </div>
         </div>
@@ -369,80 +369,61 @@ function MyBookings() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-3 pt-4 border-t" style={{ borderColor: "#1F2937" }}>
-                  <button
-                    onClick={() => navigate(`/trek/${booking.trek_schedule_id?.trek_id?._id || booking.ride_id?.trek_id}`)}
-                    className="flex-1 py-2 rounded-md text-sm font-semibold"
-            className="flex-1 py-2 rounded-md text-sm font-semibold"
-                    style={{ border: "1px solid #1F2937", color: "#9CA3AF" }}
-                  >
-                    View Trek Details
-                  </button>
-
-                   {booking.booking_status?.toLowerCase() === "pending" && (
-                     <>
-                       <button
-                         onClick={() => {
-                            setSelectedBooking(booking);
-                            setShowPaymentModal(true);
-                         }}
-                         className="px-6 py-2 rounded-md text-sm font-semibold"
-                         style={{
-                           backgroundColor: "#AAFF00",
-                           color: "#0A0F1C"
-                         }}
-                       >
-                         Confirm Booking
-                       </button>
-                       <button
-                         onClick={() => handleCancelBooking(booking._id)}
-                         className="px-6 py-2 rounded-md text-sm font-semibold"
-                         style={{
-                           backgroundColor: "#EF444420",
-                           color: "#EF4444",
-                           border: "1px solid #EF444440"
-                         }}
-                       >
-                         Cancel Booking
-                       </button>
-                     </>
-                   )}
-
-                   {booking.booking_status === "Confirmed by Trekker" && (
-                     <div className="flex-1 flex justify-between items-center bg-[#0A0F1C] p-2 rounded-lg border border-[#AAFF00]/20">
-                        <p className="text-[10px] font-bold text-gray-500 italic">
-                           ⏳ Awaiting Guide/Vendor Final Confirmation...
+                <div className="flex flex-col md:flex-row gap-4 pt-4 border-t" style={{ borderColor: "#1F2937" }}>
+                   {booking.booking_status === "Pending" && (
+                     <div className="flex-1 flex justify-between items-center bg-[#1A2235] p-3 rounded-xl border border-gray-800">
+                        <p className="text-[10px] font-bold text-gray-400 italic">
+                           ⏳ Waiting for Guide/Vendor to confirm availability...
                         </p>
                         <button
                           onClick={() => handleCancelBooking(booking._id)}
-                          className="px-3 py-1 rounded text-[10px] font-bold uppercase"
-                          style={{
-                            backgroundColor: "#EF444420",
-                            color: "#EF4444",
-                          }}
+                          className="px-8 py-3 rounded-xl text-[10px] font-black uppercase bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all shadow-lg"
                         >
-                          Withdraw
+                          Cancel Request
                         </button>
                      </div>
+                   )}
+
+                   {booking.booking_status === "Awaiting Payment" && (
+                      <div className="flex-1 flex flex-col md:flex-row items-center gap-4">
+                         <div className="flex-1 w-full bg-[#AAFF00]/5 p-3 rounded-xl border border-[#AAFF00]/10">
+                            <p className="text-[10px] font-black text-[#AAFF00] uppercase tracking-tighter">Approved & Ready!</p>
+                            <p className="text-[0.6rem] text-gray-500 font-medium">Provider has confirmed. Please pay to secure your spot.</p>
+                         </div>
+                         <div className="flex gap-3 w-full md:w-auto">
+                           <button
+                              onClick={() => {
+                                 setSelectedBooking(booking);
+                                 setShowPaymentModal(true);
+                              }}
+                              className="flex-1 md:flex-none px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest bg-[#AAFF00] text-[#0A0F1C] hover:bg-white transition-all transform active:scale-95 shadow-xl shadow-[#AAFF00]/20 min-w-[150px]"
+                           >
+                              Confirm Booking & Pay
+                           </button>
+                           <button
+                             onClick={() => handleCancelBooking(booking._id)}
+                             className="flex-1 md:flex-none px-8 py-3 rounded-xl text-[10px] font-black uppercase bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all shadow-lg"
+                           >
+                              Cancel
+                           </button>
+                         </div>
+                      </div>
                    )}
 
                    {booking.booking_status === "Confirmed" && (
-                     <div className="flex-1 flex justify-between items-center bg-[#AAFF00]/10 p-2 rounded-lg border border-[#AAFF00]/30">
-                        <p className="text-[10px] font-black text-[#AAFF00] uppercase tracking-wider">
-                           ✅ Reservation Secured! 
-                        </p>
-                        <button
-                          className="px-6 py-2 rounded-md text-xs font-black uppercase tracking-widest transition-all hover:scale-105"
-                          style={{
-                            backgroundColor: "#AAFF00",
-                            color: "#0A0F1C"
-                          }}
-                        >
-                          💳 Pay NPR {((booking.trek_schedule_id?.trek_id?.cost || booking.ride_id?.price || 0) * (booking.seats || 1)).toLocaleString()}
-                        </button>
+                     <div className="flex-1 flex justify-between items-center bg-[#34D399]/5 p-3 rounded-xl border border-[#34D399]/20">
+                        <div>
+                           <p className="text-[10px] font-black text-[#34D399] uppercase tracking-wider">✅ Reservation Secured!</p>
+                           <p className="text-[0.6rem] text-gray-500 font-medium">Your adventure is officially scheduled.</p>
+                        </div>
+                        <div className="flex items-center gap-4">
+                           <div className="text-right">
+                              <span className="text-[10px] text-gray-500 font-bold uppercase block leading-none mb-1">Total Paid</span>
+                              <span className="text-lg font-black text-white">NPR {((booking.trek_schedule_id?.trek_id?.cost || booking.ride_id?.price || 0) * (booking.seats || 1)).toLocaleString()}</span>
+                           </div>
+                        </div>
                      </div>
                    )}
-
                 </div>
 
                 {/* Booking Date */}

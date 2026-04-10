@@ -24,12 +24,10 @@ function TrekBookings() {
 
   const handleStatusUpdate = async (id, status) => {
     try {
-      await API.patch(`/api/bookings/${id}/status`, { status });
-      alert(`Booking ${status.toLowerCase()}ed!`);
+      await API.put(`/api/bookings/${id}/status`, { status });
       fetchBookings();
     } catch (error) {
       console.error("Failed to update status", error);
-      alert("Status update failed");
     }
   };
 
@@ -114,26 +112,26 @@ function TrekBookings() {
                            <td className="p-4 text-center">
                               <div className="flex flex-col gap-2">
                                  {booking.booking_status === "Pending" && (
-                                    <span className="text-[10px] text-gray-500 italic font-bold">Waiting for Trekker...</span>
-                                 )}
-                                 
-                                 {booking.booking_status === "Confirmed by Trekker" && (
                                     <button 
-                                       onClick={() => handleStatusUpdate(booking._id, "Confirmed")}
+                                       onClick={() => handleStatusUpdate(booking._id, "Awaiting Payment")}
                                        className="px-4 py-2 bg-[#AAFF00] text-black text-[10px] font-black uppercase rounded-lg hover:bg-white transition-all shadow-lg"
                                     >
-                                       Confirm Roster
+                                       Accept & Request Payment
                                     </button>
+                                 )}
+                                 
+                                 {booking.booking_status === "Awaiting Payment" && (
+                                    <span className="text-[10px] text-gray-500 italic font-bold">Waiting for Payment...</span>
                                  )}
 
                                  {booking.booking_status === "Confirmed" && (
                                     <div className="flex flex-col gap-1 text-center">
-                                       <span className="text-[10px] text-blue-400 font-black uppercase">Confirmed</span>
+                                       <span className="text-[11px] text-[#34D399] font-black uppercase tracking-widest bg-[#34D399]/10 py-1 rounded-md">Paid & Secured</span>
                                        <button 
                                           onClick={() => handleStatusUpdate(booking._id, "Completed")}
-                                          className="px-4 py-1 bg-blue-500 text-white text-[10px] font-black uppercase rounded hover:bg-blue-400 transition-all"
+                                          className="px-4 py-2 bg-blue-500 text-white text-[10px] font-black uppercase rounded hover:bg-blue-400 transition-all shadow-md mt-1"
                                        >
-                                          Complete
+                                          Mark Complete
                                        </button>
                                     </div>
                                  )}

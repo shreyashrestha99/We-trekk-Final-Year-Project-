@@ -60,17 +60,18 @@ export const getRides = async (req, res) => {
     const ridesWithSeats = await Promise.all(rides.map(async (ride) => {
        const activeBookings = await Booking.find({ 
          ride_id: ride._id, 
-         booking_status: { $in: ["Pending", "Confirmed", "Completed"] } 
+         booking_status: { $in: ["Pending", "Awaiting Payment", "Confirmed", "Completed"] } 
        });
        
-       // Combine all seat numbers from all active bookings
-       const bookedSeats = activeBookings.flatMap(b => b.seat_numbers || []);
-       
-       // Return ride object with updated booked_seats
-       const rideObj = ride.toObject();
-       rideObj.booked_seats = bookedSeats;
-       return rideObj;
-    }));
+        // Combine all seat numbers from all active bookings
+        const bookedSeats = activeBookings.flatMap(b => b.seat_numbers || []);
+        
+        // Return ride object with updated booked_seats and dynamic available_seats
+        const rideObj = ride.toObject();
+        rideObj.booked_seats = bookedSeats;
+        rideObj.available_seats = ride.total_seats - bookedSeats.length;
+        return rideObj;
+     }));
     
     res.status(200).json(ridesWithSeats);
   } catch (error) {

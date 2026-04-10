@@ -102,11 +102,10 @@ function TrekDetails() {
          await API.post(`/api/bookings/ride/${selectedRide._id}`, { seats: selectedSeats.length,
              seat_numbers: selectedSeats
           });
-         alert(`Successfully booked ${selectedSeats.length} seat(s)!`);
          setShowBookingModal(false);
-         fetchDetails(); // Refresh to update available seats
+         fetchDetails();
       } catch (error) {
-         alert(error.response?.data?.message || "Booking failed. Please try again.");
+         console.error("Booking failed:", error);
       }
    };
 
@@ -130,11 +129,10 @@ function TrekDetails() {
             trek_schedule_id: selectedSchedule._id,
             seats: trekSeats
          });
-         alert("Successfully joined the expedition!");
          setShowTrekModal(false);
          navigate("/trekker/bookings");
       } catch (error) {
-         alert(error.response?.data?.message || "Booking failed. Please try again.");
+         console.error("Join failed:", error);
       }
    };
 
@@ -406,7 +404,13 @@ function TrekDetails() {
                                     <p className="text-xs text-gray-500 font-bold uppercase mt-1">Expedition Launch</p>
                                  </div>
                                  <div className="text-right">
-                                    <span className="bg-[#AAFF00] text-black px-3 py-1 rounded-lg text-xs font-black uppercase">{sch.available_seats} Seats Open</span>
+                                    <span className={`px-3 py-1 rounded-lg text-xs font-black uppercase ${
+                                       sch.available_seats <= 3 ? 'bg-red-500 text-white animate-pulse' :
+                                       sch.available_seats <= 6 ? 'bg-orange-500 text-white' :
+                                       'bg-[#AAFF00] text-black'
+                                    }`}>
+                                       {sch.available_seats} Seats Open
+                                    </span>
                                  </div>
                               </div>
 
@@ -461,7 +465,13 @@ function TrekDetails() {
                                     <p className="text-[0.65rem] text-gray-500 font-bold uppercase tracking-tighter mt-0.5">{ride.pickup_location} → {ride.drop_location}</p>
                                     <div className="flex items-center gap-2 mt-2">
                                        <span className="text-[0.6rem] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded font-black uppercase">Rs. {ride.price}</span>
-                                       <span className="text-[0.6rem] text-gray-500 font-bold uppercase">{ride.available_seats} Seats Left</span>
+                                       <span className={`text-[0.6rem] px-2 py-1 rounded font-black uppercase ${
+                                          ride.available_seats <= 2 ? 'bg-red-500 text-white animate-pulse shadow-lg shadow-red-500/20' :
+                                          ride.available_seats <= 4 ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/10' :
+                                          'bg-blue-500/10 text-blue-400'
+                                        }`}>
+                                          {ride.available_seats} Seats Left
+                                        </span>
                                     </div>
                                  </div>
                               </div>

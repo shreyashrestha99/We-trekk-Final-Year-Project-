@@ -33,12 +33,10 @@ function ManageBookings() {
 
   const handleStatusUpdate = async (id, status) => {
     try {
-      await API.patch(`/api/bookings/${id}/status`, { status });
-      alert(`Booking ${status.toLowerCase()}ed!`);
+      await API.put(`/api/bookings/${id}/status`, { status });
       fetchBookings();
     } catch (error) {
-      console.error("Failed to update status", error);
-      alert("Status update failed");
+      console.error("Status update failed:", error);
     }
   };
 
@@ -101,34 +99,37 @@ function ManageBookings() {
                       {booking.booking_status}
                     </span>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-col gap-2 justify-center">
+                  <td className="p-4 text-center">
+                    <div className="flex flex-col gap-2">
                        {booking.booking_status === "Pending" && (
-                          <span className="text-[10px] text-gray-500 italic text-center">Waiting for Trekker</span>
-                       )}
-
-                       {booking.booking_status === "Confirmed by Trekker" && (
                           <button 
-                             onClick={() => handleStatusUpdate(booking._id, "Confirmed")}
-                             className="px-3 py-1 bg-[#AAFF00] text-black text-[10px] font-bold uppercase rounded active:scale-95"
+                             onClick={() => handleStatusUpdate(booking._id, "Awaiting Payment")}
+                             className="px-4 py-2 bg-[#AAFF00] text-black text-[10px] font-black uppercase rounded-lg hover:bg-white transition-all shadow-lg"
                           >
-                             Confirm
+                             Accept & Request Payment
                           </button>
                        )}
                        
+                       {booking.booking_status === "Awaiting Payment" && (
+                          <span className="text-[10px] text-gray-500 italic font-bold">Waiting for Payment...</span>
+                       )}
+
                        {booking.booking_status === "Confirmed" && (
-                          <button 
-                             onClick={() => handleStatusUpdate(booking._id, "Completed")}
-                             className="px-3 py-1 bg-blue-600 text-white text-[10px] font-bold uppercase rounded active:scale-95"
-                          >
-                             Complete
-                          </button>
+                          <div className="flex flex-col gap-1 text-center">
+                             <span className="text-[11px] text-[#34D399] font-black uppercase tracking-widest bg-[#34D399]/10 py-1 rounded-md">Paid & Secured</span>
+                             <button 
+                                onClick={() => handleStatusUpdate(booking._id, "Completed")}
+                                className="px-4 py-2 bg-blue-500 text-white text-[10px] font-black uppercase rounded hover:bg-blue-400 transition-all shadow-md mt-1"
+                             >
+                                Mark Complete
+                             </button>
+                          </div>
                        )}
 
                        {(booking.booking_status !== "Cancelled" && booking.booking_status !== "Completed") && (
                           <button 
                              onClick={() => handleStatusUpdate(booking._id, "Cancelled")}
-                             className="px-3 py-1 border border-red-500 text-red-500 text-[10px] font-bold uppercase rounded hover:bg-red-500 hover:text-white"
+                             className="px-4 py-2 bg-red-500/10 border border-red-500/30 text-red-500 text-[10px] font-black uppercase rounded-lg hover:bg-red-500 hover:text-white transition-all"
                           >
                              Cancel
                           </button>
