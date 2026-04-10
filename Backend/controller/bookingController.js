@@ -36,11 +36,13 @@ export const createBooking = async (req, res) => {
     // 4. Save updated TrekSchedule
     await schedule.save();
 
-    // 5. Create booking
+    // 5. Create booking with total price
+    const totalPrice = (schedule.trek_id.cost || 0) * requestedSeats;
     const booking = new Booking({
       user_id: req.user.id,
       trek_schedule_id: schedule._id,
-      seats: requestedSeats
+      seats: requestedSeats,
+      total_price: totalPrice
     });
     const createdBooking = await booking.save();
 
@@ -102,12 +104,14 @@ export const bookRide = async (req, res) => {
     ride.booked_seats.push(...seat_numbers);
     await ride.save();
 
-    // Create booking record
+    // Create booking record with total price
+    const totalPrice = (ride.price || 0) * requestedSeats;
     const booking = new Booking({
       user_id: req.user.id,
       ride_id: ride._id,
       seats: requestedSeats,
-      seat_numbers: seat_numbers
+      seat_numbers: seat_numbers,
+      total_price: totalPrice
     });
 
     await booking.save();

@@ -94,18 +94,24 @@ function TrekDetails() {
       if (!selectedRide) return;
 
       if (selectedSeats.length === 0) {
-         alert(`Please enter a valid number of seats (1-${selectedRide.available_seats})`);
+         alert(`Please select at least one seat.`);
          return;
       }
 
       try {
-         await API.post(`/api/bookings/ride/${selectedRide._id}`, { seats: selectedSeats.length,
-             seat_numbers: selectedSeats
-          });
+         const response = await API.post(`/api/bookings/ride/${selectedRide._id}`, { 
+            seats: selectedSeats.length,
+            seat_numbers: selectedSeats
+         });
+         
          setShowBookingModal(false);
-         fetchDetails();
+         const bookingData = response.data.booking;
+         
+         // Redirect to Payment Page
+         navigate(`/trekker/payment?bookingId=${bookingData._id}&amount=${bookingData.total_price}&type=Ride`);
       } catch (error) {
          console.error("Booking failed:", error);
+         alert(error.response?.data?.message || "Booking failed. Please try again.");
       }
    };
 
@@ -125,14 +131,19 @@ function TrekDetails() {
       if (!selectedSchedule) return;
 
       try {
-         await API.post("/api/bookings", {
+         const response = await API.post("/api/bookings", {
             trek_schedule_id: selectedSchedule._id,
             seats: trekSeats
          });
+         
          setShowTrekModal(false);
-         navigate("/trekker/bookings");
+         const bookingData = response.data;
+         
+         // Redirect to Payment Page
+         navigate(`/trekker/payment?bookingId=${bookingData._id}&amount=${bookingData.total_price}&type=Trek`);
       } catch (error) {
          console.error("Join failed:", error);
+         alert(error.response?.data?.message || "Join failed. Please try again.");
       }
    };
 

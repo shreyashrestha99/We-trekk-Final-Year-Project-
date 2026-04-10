@@ -19,6 +19,14 @@ const paymentSchema = new mongoose.Schema({
     type: String,
     enum: ["Pending", "Completed", "Failed", "Refunded"],
     default: "Pending"
+  },
+  transaction_id: {
+    type: String,
+    default: ""
+  },
+  khalti_token: {
+    type: String,
+    default: ""
   }
 }, { timestamps: true });
 

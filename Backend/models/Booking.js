@@ -40,6 +40,11 @@ const bookingSchema = new mongoose.Schema({
   seat_numbers: {
     type: [Number],
     default: []
+  },
+  total_price: {
+    type: Number,
+    required: true,
+    default: 0
   }
 }, { timestamps: true });
 

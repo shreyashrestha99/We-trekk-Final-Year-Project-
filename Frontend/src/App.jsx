@@ -16,6 +16,7 @@ import MyBookings from "./page/Trekker/MyBookings";
 import ExpenseTracker from "./page/Trekker/ExpenseTracker";
 import BrowseTreksRides from "./page/Trekker/BrowseTreksRides";
 import TrekkerProfile from "./page/Trekker/TrekkerProfile";
+import Payment from "./page/Trekker/Payment";
 
 // VENDOR
 import VendorDashboard from "./page/Vendor/VendorDashboard";
@@ -78,6 +79,11 @@ function App() {
       <Route path="/trekker/profile" element={
         <ProtectedRoute allowedRoles={["Trekker"]}>
           <TrekkerProfile />
+        </ProtectedRoute>
+      } />
+      <Route path="/trekker/payment" element={
+        <ProtectedRoute allowedRoles={["Trekker"]}>
+          <Payment />
         </ProtectedRoute>
       } />
 
