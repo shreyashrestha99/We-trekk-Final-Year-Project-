@@ -25,7 +25,7 @@ const Payment = () => {
     const handlePay = async () => {
         setLoading(true);
         try {
-            const response = await axios.post("/payments/initiate", {
+            const response = await axios.post("/api/payments/initiate", {
                 amount: parseFloat(amount),
                 bookingId: bookingId,
                 purchase_order_name: `${type} Payment`,

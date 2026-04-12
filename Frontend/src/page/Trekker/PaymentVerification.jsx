@@ -33,7 +33,7 @@ const PaymentVerification = () => {
                 const bookingId = localStorage.getItem("khalti_booking_id") || purchase_order_id;
                 const amount = localStorage.getItem("khalti_amount");
 
-                const response = await axios.post("/payments/verify", {
+                const response = await axios.post("/api/payments/verify", {
                     pidx,
                     bookingId,
                     amount: parseFloat(amount)
