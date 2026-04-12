@@ -98,6 +98,13 @@ function ManageBookings() {
                     }`}>
                       {booking.booking_status}
                     </span>
+                    {booking.dispute_status !== "None" && (
+                      <div className="mt-1">
+                        <span className={`px-2 py-0.5 text-[10px] font-black uppercase rounded ${booking.dispute_status === "Raised" ? "bg-red-500/20 text-red-500" : "bg-green-500/20 text-green-500"}`}>
+                          Dispute {booking.dispute_status}
+                        </span>
+                      </div>
+                    )}
                   </td>
                   <td className="p-4 text-center">
                     <div className="flex flex-col gap-2">

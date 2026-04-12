@@ -101,11 +101,18 @@ function TrekBookings() {
                            <td className="p-4 font-mono text-sm text-[#AAFF00]">
                               NPR {( (booking.trek_schedule_id?.trek_id?.cost || 0) * booking.seats ).toLocaleString()}
                            </td>
-                          <td className="p-4">
-                             <span className={`px-3 py-1 text-xs font-black uppercase tracking-widest rounded-full border ${getStatusColor(booking.booking_status)}`}>
-                               {booking.booking_status}
-                             </span>
-                          </td>
+                           <td className="p-4">
+                              <span className={`px-3 py-1 text-xs font-black uppercase tracking-widest rounded-full border ${getStatusColor(booking.booking_status)}`}>
+                                {booking.booking_status}
+                              </span>
+                              {booking.dispute_status !== "None" && (
+                                <div className="mt-1">
+                                  <span className={`px-2 py-0.5 text-[10px] font-black uppercase rounded ${booking.dispute_status === "Raised" ? "bg-red-500/20 text-red-500" : "bg-green-500/20 text-green-500"}`}>
+                                    Dispute {booking.dispute_status}
+                                  </span>
+                                </div>
+                              )}
+                           </td>
                           <td className="p-4">
                              <p className="text-sm font-medium text-gray-400">{new Date(booking.createdAt).toLocaleString()}</p>
                           </td>
