@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "../../utils/axios";
 import DashboardLayout from "../../components/DashboardLayout";
@@ -22,56 +22,31 @@ const Payment = () => {
 
     const [loading, setLoading] = useState(false);
 
-    // Khalti Configuration
-    const config = {
-        "publicKey": import.meta.env.VITE_KHALTI_PUBLIC_KEY,
-        "productIdentity": bookingId,
-        "productName": `${type} Payment`,
-        "productUrl": window.location.href,
-        "eventHandler": {
-            onSuccess(payload) {
-                console.log("Khalti Success Payload:", payload);
-                verifyPayment(payload);
-            },
-            onError(error) {
-                console.log("Khalti Error:", error);
-                alert("Payment initiation failed. Please try again.");
-            },
-            onClose() {
-                console.log("Khalti checkout closed");
-            }
-        },
-        "paymentPreference": ["KHALTI", "EBANKING", "MOBILE_BANKING", "CONNECT_IPS", "SCT"],
-    };
-
-    const verifyPayment = async (payload) => {
+    const handlePay = async () => {
         setLoading(true);
         try {
-            const response = await axios.post("/payments/verify", {
-                token: payload.token,
-                amount: payload.amount,
-                bookingId: bookingId
+            const response = await axios.post("/payments/initiate", {
+                amount: parseFloat(amount),
+                bookingId: bookingId,
+                purchase_order_name: `${type} Payment`,
             });
 
-            if (response.status === 200) {
-                alert("Payment Successful! Your booking is confirmed.");
-                navigate("/trekker/bookings");
+            if (response.data.success && response.data.data.payment_url) {
+                // Store necessary info in localStorage for verification after redirect
+                localStorage.setItem("khalti_booking_id", bookingId);
+                localStorage.setItem("khalti_amount", amount);
+                
+                // Redirect to Khalti's hosted page
+                window.location.href = response.data.data.payment_url;
+            } else {
+                throw new Error("Failed to get payment URL");
             }
         } catch (error) {
-            console.error("Verification Error:", error);
-            alert("Payment verification failed. Please contact support.");
+            console.error("Payment Initiation Error:", error);
+            alert("Failed to initiate payment. Please try again later.");
         } finally {
             setLoading(false);
         }
-    };
-
-    const handlePay = () => {
-        if (!window.KhaltiCheckout) {
-            alert("Khalti SDK not loaded. Please refresh the page.");
-            return;
-        }
-        const checkout = new window.KhaltiCheckout(config);
-        checkout.show({ amount: amount * 100 }); // Amount in paisa
     };
 
     if (!bookingId || !amount) {
@@ -118,7 +93,7 @@ const Payment = () => {
                         }}
                     >
                         {loading ? (
-                            <span>Verifying...</span>
+                            <span>Initiating Payment...</span>
                         ) : (
                             <>
                                 <span>Pay with Khalti</span>

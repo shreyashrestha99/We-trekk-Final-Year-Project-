@@ -121,7 +121,12 @@ function TrekBookings() {
                                  )}
                                  
                                  {booking.booking_status === "Awaiting Payment" && (
-                                    <span className="text-[10px] text-gray-500 italic font-bold">Waiting for Payment...</span>
+                                    <button 
+                                      disabled
+                                      className="px-4 py-2 bg-gray-800 text-gray-500 text-[10px] font-black uppercase rounded-lg border border-gray-700 cursor-not-allowed"
+                                    >
+                                       Waiting for Payment
+                                    </button>
                                  )}
 
                                  {booking.booking_status === "Confirmed" && (

@@ -17,6 +17,7 @@ import ExpenseTracker from "./page/Trekker/ExpenseTracker";
 import BrowseTreksRides from "./page/Trekker/BrowseTreksRides";
 import TrekkerProfile from "./page/Trekker/TrekkerProfile";
 import Payment from "./page/Trekker/Payment";
+import PaymentVerification from "./page/Trekker/PaymentVerification";
 
 // VENDOR
 import VendorDashboard from "./page/Vendor/VendorDashboard";
@@ -84,6 +85,11 @@ function App() {
       <Route path="/trekker/payment" element={
         <ProtectedRoute allowedRoles={["Trekker"]}>
           <Payment />
+        </ProtectedRoute>
+      } />
+      <Route path="/payment-verification" element={
+        <ProtectedRoute allowedRoles={["Trekker"]}>
+          <PaymentVerification />
         </ProtectedRoute>
       } />
 

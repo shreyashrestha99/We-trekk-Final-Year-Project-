@@ -186,12 +186,17 @@ function MyBookings() {
                 >
                    Hold Off
                 </button>
-                 <button
-                   onClick={() => handleStatusUpdate(selectedBooking._id, "Confirmed")}
-                   className="py-4 rounded-xl font-black text-xs uppercase tracking-widest bg-[#AAFF00] text-[#0A0F1C] hover:bg-white transition-all transform active:scale-95 shadow-xl shadow-[#AAFF00]/20"
-                 >
-                    Pay & Secure Spot
-                 </button>
+                <button
+                  onClick={() => {
+                    setShowPaymentModal(false);
+                    const amount = ((selectedBooking.trek_schedule_id?.trek_id?.cost || selectedBooking.ride_id?.price || 0) * selectedBooking.seats);
+                    const type = selectedBooking.trek_schedule_id ? "Trek" : "Ride";
+                    navigate(`/trekker/payment?bookingId=${selectedBooking._id}&amount=${amount}&type=${type}`);
+                  }}
+                  className="py-4 rounded-xl font-black text-xs uppercase tracking-widest bg-[#AAFF00] text-[#0A0F1C] hover:bg-white transition-all transform active:scale-95 shadow-xl shadow-[#AAFF00]/20"
+                >
+                   Pay & Secure Spot
+                </button>
              </div>
           </div>
         </div>
