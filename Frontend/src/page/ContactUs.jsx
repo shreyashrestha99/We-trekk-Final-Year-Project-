@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 function ContactUs() {
   const navigate = useNavigate();
@@ -318,14 +319,7 @@ function ContactUs() {
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer style={{ backgroundColor: "#0A0F1C", borderTop: "1px solid #1F2937" }}>
-        <div className="max-w-7xl mx-auto px-6 py-6 text-center">
-          <p className="text-sm" style={{ color: "#6B7280" }}>
-            © 2025 WeTrekk. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

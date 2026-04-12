@@ -6,10 +6,10 @@ import DashboardLayout from "../../components/DashboardLayout";
 const menuItems = [
   { label: "Dashboard", icon: "🏠", path: "/admin/dashboard" },
   { label: "All Users", icon: "👥", path: "/admin/users" },
-  { label: "All Treks", icon: "🏔️", path: "/admin/treks" },
+  { label: "Browse Treks & Rides", icon: "🧭", path: "/admin/browse" },
+  { label: "Manage Treks", icon: "🏔️", path: "/admin/treks" },
   { label: "Verifications", icon: "✅", path: "/admin/verify" },
   { label: "Disputes", icon: "⚠️", path: "/admin/disputes" },
-  { label: "Platform Stats", icon: "📊", path: "/admin/stats" },
 ];
 
 function AdminDashboard() {
@@ -68,9 +68,10 @@ function AdminDashboard() {
           <div className="space-y-3">
             {[
               { label: "👥 Manage All Users", path: "/admin/users", primary: true },
+              { label: "🧭 Explore Treks & Rides", path: "/admin/browse", primary: false },
+              { label: "🏔️ Manage Listed Treks", path: "/admin/treks", primary: false },
+              { label: "⚠️ View Active Disputes", path: "/admin/disputes", primary: false },
               { label: "✅ Verify Guides & Vendors", path: "/admin/verify", primary: false },
-              { label: "⚠️ View Disputes", path: "/admin/disputes", primary: false },
-              { label: "📊 Platform Statistics", path: "/admin/stats", primary: false },
             ].map((action) => (
               <button
                 key={action.label}

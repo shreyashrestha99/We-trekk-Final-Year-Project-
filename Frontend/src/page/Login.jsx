@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import API from "../utils/axios";
+import Footer from "../components/Footer";
 import { useAuth } from "../context/AuthContext";
 function Login() {
   const [email, setEmail] = useState("");
@@ -291,17 +292,7 @@ function Login() {
         </div>
       </main>
 
-      {/* FOOTER */}
-      <footer
-        style={{
-          borderTop: "1px solid #1F2937",
-        }}
-        className="py-4"
-      >
-        <p className="text-center text-sm" style={{ color: "#6B7280" }}>
-          © 2025 WeTrekk. All rights reserved.
-        </p>
-      </footer>
+      <Footer />
     </div>
   );
 }

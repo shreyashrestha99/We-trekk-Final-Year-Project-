@@ -5,10 +5,10 @@ import API from "../../utils/axios";
 const menuItems = [
   { label: "Dashboard", icon: "🏠", path: "/admin/dashboard" },
   { label: "All Users", icon: "👥", path: "/admin/users" },
-  { label: "All Treks", icon: "🏔️", path: "/admin/treks" },
+  { label: "Browse Treks & Rides", icon: "🧭", path: "/admin/browse" },
+  { label: "Manage Treks", icon: "🏔️", path: "/admin/treks" },
   { label: "Verifications", icon: "✅", path: "/admin/verify" },
   { label: "Disputes", icon: "⚠️", path: "/admin/disputes" },
-  { label: "Platform Stats", icon: "📊", path: "/admin/stats" },
 ];
 
 function AllUsers() {

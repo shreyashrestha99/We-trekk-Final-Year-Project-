@@ -18,22 +18,24 @@ function Footer() {
           </div>
           <div>
             <h4 className="font-bold text-white mb-3">Quick Links</h4>
-            {["Explore Treks", "Register", "Login"].map(link => (
-              <p key={link} className="text-sm mb-2 cursor-pointer"
-                style={{ color: "#9CA3AF" }}
-                onClick={() => navigate(`/${link.toLowerCase().replace(" ", "")}`)}
-              >
-                {link}
-              </p>
-            ))}
+            <p className="text-sm mb-2 cursor-pointer" style={{ color: "#9CA3AF" }} onClick={() => navigate("/explore")}>
+              Explore Treks
+            </p>
+            <p className="text-sm mb-2 cursor-pointer" style={{ color: "#9CA3AF" }} onClick={() => navigate("/register")}>
+              Register
+            </p>
+            <p className="text-sm mb-2 cursor-pointer" style={{ color: "#9CA3AF" }} onClick={() => navigate("/login")}>
+              Login
+            </p>
           </div>
           <div>
-            <h4 className="font-bold text-white mb-3">Legal</h4>
-            {["Privacy Policy", "Terms of Service", "Contact Us"].map(link => (
-              <p key={link} className="text-sm mb-2" style={{ color: "#9CA3AF" }}>
-                {link}
-              </p>
-            ))}
+            <h4 className="font-bold text-white mb-3">Company</h4>
+            <p className="text-sm mb-2 cursor-pointer" style={{ color: "#9CA3AF" }} onClick={() => navigate("/about")}>
+              About Us
+            </p>
+            <p className="text-sm mb-2 cursor-pointer" style={{ color: "#9CA3AF" }} onClick={() => navigate("/contact")}>
+              Contact Us
+            </p>
           </div>
           <div>
             <h4 className="font-bold text-white mb-3">Follow Us</h4>

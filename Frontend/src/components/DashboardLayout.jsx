@@ -56,8 +56,14 @@ function DashboardLayout({ children, menuItems }) {
         {/* USER INFO */}
         {sidebarOpen && (
           <div
-            className="px-4 py-4"
+            className="px-4 py-4 cursor-pointer hover:bg-white/5 transition-all"
             style={{ borderBottom: "1px solid #1F2937" }}
+            onClick={() => {
+              if (user?.role === "Trekker") navigate("/trekker/dashboard");
+              else if (user?.role === "Guide") navigate("/guide/dashboard");
+              else if (user?.role === "LocalVendor") navigate("/vendor/dashboard");
+              else if (user?.role === "Admin") navigate("/admin/dashboard");
+            }}
           >
             <div
               className="w-10 h-10 rounded-full flex items-center justify-center font-black text-sm mb-2"
@@ -137,7 +143,15 @@ function DashboardLayout({ children, menuItems }) {
               {user?.role} Portal
             </p>
           </div>
-          <div className="flex items-center space-x-3">
+          <div 
+            className="flex items-center space-x-3 cursor-pointer hover:opacity-80 transition-all"
+            onClick={() => {
+              if (user?.role === "Trekker") navigate("/trekker/dashboard");
+              else if (user?.role === "Guide") navigate("/guide/dashboard");
+              else if (user?.role === "LocalVendor") navigate("/vendor/dashboard");
+              else if (user?.role === "Admin") navigate("/admin/dashboard");
+            }}
+          >
             <div
               className="w-8 h-8 rounded-full flex items-center justify-center font-black text-xs"
               style={{ backgroundColor: "#AAFF00", color: "#0A0F1C" }}

@@ -19,7 +19,10 @@ function MyBookings() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [activeType, setActiveType] = useState("All"); // "All", "Trek", "Ride"
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showDisputeModal, setShowDisputeModal] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const [disputeReason, setDisputeReason] = useState("");
+  const [submittingDispute, setSubmittingDispute] = useState(false);
 
   useEffect(() => {
     fetchBookings();
@@ -93,6 +96,25 @@ function MyBookings() {
     } catch (err) {
       console.error("Failed to update status", err);
       alert("Status update failed");
+    }
+  };
+
+  const handleRaiseDispute = async () => {
+    if (!disputeReason.trim()) {
+      alert("Please provide a reason for the dispute.");
+      return;
+    }
+    setSubmittingDispute(true);
+    try {
+      await API.put(`/api/bookings/${selectedBooking._id}/dispute`, { reason: disputeReason });
+      alert("Dispute raised successfully. Admin will review it.");
+      setShowDisputeModal(false);
+      setDisputeReason("");
+      fetchBookings();
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to raise dispute");
+    } finally {
+      setSubmittingDispute(false);
     }
   };
 
@@ -196,6 +218,44 @@ function MyBookings() {
                   className="py-4 rounded-xl font-black text-xs uppercase tracking-widest bg-[#AAFF00] text-[#0A0F1C] hover:bg-white transition-all transform active:scale-95 shadow-xl shadow-[#AAFF00]/20"
                 >
                    Pay & Secure Spot
+                </button>
+             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Dispute Modal */}
+      {showDisputeModal && selectedBooking && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-[#1A2235] rounded-3xl border border-red-500/20 max-w-lg w-full p-8 shadow-2xl overflow-hidden relative">
+             <div className="absolute top-0 left-0 w-full h-1 bg-red-500"></div>
+             
+             <h2 className="text-2xl font-black text-white mb-2 uppercase tracking-tight">Report Issue</h2>
+             <p className="text-xs text-gray-500 font-bold uppercase tracking-widest mb-6">Adventure Ledger Ref: {selectedBooking._id.slice(-6)}</p>
+
+             <div className="mb-6">
+               <label className="block text-[0.6rem] text-gray-500 font-bold uppercase mb-2 tracking-widest">Reason for Dispute</label>
+               <textarea
+                 value={disputeReason}
+                 onChange={(e) => setDisputeReason(e.target.value)}
+                 placeholder="Please explain why you are raising a dispute..."
+                 className="w-full bg-[#0A0F1C] border border-gray-800 rounded-2xl p-4 text-white text-sm focus:outline-none focus:border-red-500 transition-all h-32"
+               />
+             </div>
+
+             <div className="grid grid-cols-2 gap-4">
+                <button
+                  onClick={() => setShowDisputeModal(false)}
+                  className="py-4 rounded-xl font-bold text-xs uppercase tracking-widest border border-gray-800 text-gray-500 hover:bg-gray-800 transition-all"
+                >
+                   Cancel
+                </button>
+                <button
+                  onClick={handleRaiseDispute}
+                  disabled={submittingDispute}
+                  className="py-4 rounded-xl font-black text-xs uppercase tracking-widest bg-red-500 text-white hover:bg-red-600 transition-all transform active:scale-95"
+                >
+                   {submittingDispute ? "Reporting..." : "Raise Dispute"}
                 </button>
              </div>
           </div>
@@ -415,20 +475,35 @@ function MyBookings() {
                       </div>
                    )}
 
-                   {booking.booking_status === "Confirmed" && (
-                     <div className="flex-1 flex justify-between items-center bg-[#34D399]/5 p-3 rounded-xl border border-[#34D399]/20">
-                        <div>
-                           <p className="text-[10px] font-black text-[#34D399] uppercase tracking-wider">✅ Reservation Secured!</p>
-                           <p className="text-[0.6rem] text-gray-500 font-medium">Your adventure is officially scheduled.</p>
-                        </div>
-                        <div className="flex items-center gap-4">
-                           <div className="text-right">
-                              <span className="text-[10px] text-gray-500 font-bold uppercase block leading-none mb-1">Total Paid</span>
-                              <span className="text-lg font-black text-white">NPR {((booking.trek_schedule_id?.trek_id?.cost || booking.ride_id?.price || 0) * (booking.seats || 1)).toLocaleString()}</span>
-                           </div>
-                        </div>
-                     </div>
-                   )}
+                    {booking.booking_status === "Confirmed" && (
+                      <div className="flex-1 flex justify-between items-center bg-[#34D399]/5 p-3 rounded-xl border border-[#34D399]/20">
+                         <div>
+                            <p className="text-[10px] font-black text-[#34D399] uppercase tracking-wider">✅ Reservation Secured!</p>
+                            <p className="text-[0.6rem] text-gray-500 font-medium">Your adventure is officially scheduled.</p>
+                         </div>
+                         <div className="flex items-center gap-4">
+                            <div className="text-right mr-4">
+                               <span className="text-[10px] text-gray-500 font-bold uppercase block leading-none mb-1">Total Paid</span>
+                               <span className="text-lg font-black text-white">NPR {((booking.trek_schedule_id?.trek_id?.cost || booking.ride_id?.price || 0) * (booking.seats || 1)).toLocaleString()}</span>
+                            </div>
+                            {booking.dispute_status === "None" ? (
+                              <button
+                                onClick={() => {
+                                  setSelectedBooking(booking);
+                                  setShowDisputeModal(true);
+                                }}
+                                className="px-4 py-2 rounded-lg text-[10px] font-bold uppercase border border-red-500/30 text-red-500 hover:bg-red-500 hover:text-white transition-all"
+                              >
+                                Report Issue
+                              </button>
+                            ) : (
+                               <span className="text-[10px] font-black uppercase text-red-500 bg-red-500/10 px-3 py-1 rounded">
+                                 Dispute {booking.dispute_status}
+                               </span>
+                            )}
+                         </div>
+                      </div>
+                    )}
                 </div>
 
                 {/* Booking Date */}

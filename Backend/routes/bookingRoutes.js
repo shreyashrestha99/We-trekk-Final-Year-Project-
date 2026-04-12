@@ -1,5 +1,5 @@
 import express from "express";
-import { createBooking, getMyBookings, cancelBooking, getVendorBookings, bookRide, getGuideBookings, updateBookingStatus } from "../controller/bookingController.js";
+import { createBooking, getMyBookings, cancelBooking, getVendorBookings, bookRide, getGuideBookings, updateBookingStatus, raiseDispute } from "../controller/bookingController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { authorize } from "../middleware/roleMiddleware.js";
 
@@ -22,5 +22,8 @@ router.route("/:id/cancel")
 
 router.route("/:id/status")
   .put(protect, authorize("Trekker", "Guide", "LocalVendor", "Admin"), updateBookingStatus);
+
+router.route("/:id/dispute")
+  .put(protect, authorize("Trekker"), raiseDispute);
 
 export default router;

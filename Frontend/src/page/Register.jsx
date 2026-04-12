@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import Footer from "../components/Footer";
 
 function Register() {
   const [name, setName] = useState("");
@@ -368,6 +369,7 @@ function Register() {
           </p>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

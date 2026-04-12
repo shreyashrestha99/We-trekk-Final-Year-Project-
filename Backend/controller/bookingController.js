@@ -312,3 +312,26 @@ export const updateBookingStatus = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// PUT /api/bookings/:id/dispute (Trekker raises a dispute)
+export const raiseDispute = async (req, res) => {
+  try {
+    const { reason } = req.body;
+    const booking = await Booking.findOne({ _id: req.params.id, user_id: req.user.id });
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found or not owned by you" });
+    }
+
+    booking.dispute_status = "Raised";
+    booking.dispute_reason = reason;
+    await booking.save();
+
+    // Notify Admin (optional, but good for internal tracking)
+    // In a real app, you might find the Admin user ID or send an email
+    
+    res.json({ message: "Dispute raised successfully. Our team will review it.", booking });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

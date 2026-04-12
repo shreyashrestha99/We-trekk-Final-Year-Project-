@@ -42,6 +42,9 @@ import GuideProfile from "./page/Guide/GuideProfile";
 import AdminDashboard from "./page/Admin/AdminDashboard";
 import AllUsers from "./page/Admin/AllUsers";
 import Verification from "./page/Admin/Verifications";
+import BrowseTreksRidesAdmin from "./page/Admin/BrowseTreksRidesAdmin";
+import AdminTreks from "./page/Admin/AdminTreks";
+import Disputes from "./page/Admin/Disputes";
 
 function App() {
   return (
@@ -186,6 +189,21 @@ function App() {
       <Route path="/admin/verify" element={
         <ProtectedRoute allowedRoles={["Admin"]}>
           <Verification />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/browse" element={
+        <ProtectedRoute allowedRoles={["Admin"]}>
+          <BrowseTreksRidesAdmin />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/treks" element={
+        <ProtectedRoute allowedRoles={["Admin"]}>
+          <AdminTreks />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/disputes" element={
+        <ProtectedRoute allowedRoles={["Admin"]}>
+          <Disputes />
         </ProtectedRoute>
       } />
 
