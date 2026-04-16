@@ -94,6 +94,7 @@ function ManageBookings() {
                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                       booking.booking_status === "Confirmed" ? "bg-green-900 text-green-300" :
                       booking.booking_status === "Cancelled" ? "bg-red-900 text-red-300" :
+                      booking.booking_status === "Awaiting Payment" ? "bg-[#AAFF00]/10 text-[#AAFF00] border border-[#AAFF00]/30" :
                       "bg-yellow-900 text-yellow-300"
                     }`}>
                       {booking.booking_status}

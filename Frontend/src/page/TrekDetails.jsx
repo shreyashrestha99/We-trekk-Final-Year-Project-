@@ -99,16 +99,14 @@ function TrekDetails() {
       }
 
       try {
-         const response = await API.post(`/api/bookings/ride/${selectedRide._id}`, { 
+         await API.post(`/api/bookings/ride/${selectedRide._id}`, { 
             seats: selectedSeats.length,
             seat_numbers: selectedSeats
          });
          
          setShowBookingModal(false);
-         const bookingData = response.data.booking;
-         
-         // Redirect to Payment Page
-         navigate(`/trekker/payment?bookingId=${bookingData._id}&amount=${bookingData.total_price}&type=Ride`);
+         alert("Ride booking request sent! Please wait for the vendor to review and confirm your booking.");
+         navigate("/trekker/bookings");
       } catch (error) {
          console.error("Booking failed:", error);
          alert(error.response?.data?.message || "Booking failed. Please try again.");
@@ -131,16 +129,14 @@ function TrekDetails() {
       if (!selectedSchedule) return;
 
       try {
-         const response = await API.post("/api/bookings", {
+         await API.post("/api/bookings", {
             trek_schedule_id: selectedSchedule._id,
             seats: trekSeats
          });
          
          setShowTrekModal(false);
-         const bookingData = response.data;
-         
-         // Redirect to Payment Page
-         navigate(`/trekker/payment?bookingId=${bookingData._id}&amount=${bookingData.total_price}&type=Trek`);
+         alert("Trek booking request sent! Please wait for the guide to review and confirm your booking.");
+         navigate("/trekker/bookings");
       } catch (error) {
          console.error("Join failed:", error);
          alert(error.response?.data?.message || "Join failed. Please try again.");

@@ -35,6 +35,7 @@ function TrekBookings() {
     switch (status) {
       case "Confirmed": return "text-[#34D399] bg-[#34D399]/10 border-[#34D399]/20";
       case "Pending": return "text-yellow-400 bg-yellow-400/10 border-yellow-400/20";
+      case "Awaiting Payment": return "text-[#AAFF00] bg-[#AAFF00]/10 border-[#AAFF00]/20";
       case "Cancelled": return "text-red-400 bg-red-400/10 border-red-400/20";
       case "Completed": return "text-blue-400 bg-blue-400/10 border-blue-400/20";
       default: return "text-white bg-gray-800 border-gray-700";
