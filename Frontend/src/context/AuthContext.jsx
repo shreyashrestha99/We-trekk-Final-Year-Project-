@@ -17,10 +17,23 @@ export const AuthProvider = ({ children }) => {
     if (savedToken) {
       setToken(savedToken);
       setRole(savedRole);
-      setUser({ name: savedName, role: savedRole });
+      setUser({ 
+        name: savedName, 
+        role: savedRole,
+        profile_image: localStorage.getItem("profile_image") || "",
+        phone: localStorage.getItem("phone") || ""
+      });
     }
     setLoading(false);
   }, []);
+
+  // Sync user data without re-login
+  const syncUser = (updatedData) => {
+    setUser(prev => ({ ...prev, ...updatedData }));
+    if (updatedData.name) localStorage.setItem("name", updatedData.name);
+    if (updatedData.profile_image) localStorage.setItem("profile_image", updatedData.profile_image);
+    if (updatedData.phone) localStorage.setItem("phone", updatedData.phone);
+  };
 
   // Login function
   const login = (userData, userToken) => {
@@ -30,6 +43,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("token", userToken);
     localStorage.setItem("role", userData.role);
     localStorage.setItem("name", userData.name);
+    localStorage.setItem("profile_image", userData.profile_image || "");
+    localStorage.setItem("phone", userData.phone || "");
   };
 
   // Logout function
@@ -37,13 +52,11 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setToken(null);
     setRole(null);
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    localStorage.removeItem("name");
+    localStorage.clear();
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, role, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, role, login, logout, syncUser, loading }}>
       {children}
     </AuthContext.Provider>
   );

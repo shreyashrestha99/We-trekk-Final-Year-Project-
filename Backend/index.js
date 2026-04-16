@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+dotenv.config();
 import cors from "cors";
 import path from "path";
 import connectDB from "./config/db.js";
@@ -14,8 +15,6 @@ import expenseRoutes from "./routes/expenseRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import rideRoutes from "./routes/rideRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
-
-dotenv.config();
 
 const app = express();
 app.use(cors());

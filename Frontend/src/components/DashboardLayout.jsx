@@ -59,17 +59,21 @@ function DashboardLayout({ children, menuItems }) {
             className="px-4 py-4 cursor-pointer hover:bg-white/5 transition-all"
             style={{ borderBottom: "1px solid #1F2937" }}
             onClick={() => {
-              if (user?.role === "Trekker") navigate("/trekker/dashboard");
-              else if (user?.role === "Guide") navigate("/guide/dashboard");
-              else if (user?.role === "LocalVendor") navigate("/vendor/dashboard");
+              if (user?.role === "Trekker") navigate("/trekker/profile"); // Fix: go to actual profile
+              else if (user?.role === "Guide") navigate("/guide/profile");
+              else if (user?.role === "LocalVendor") navigate("/vendor/profile");
               else if (user?.role === "Admin") navigate("/admin/dashboard");
             }}
           >
             <div
-              className="w-10 h-10 rounded-full flex items-center justify-center font-black text-sm mb-2"
-              style={{ backgroundColor: "#AAFF00", color: "#0A0F1C" }}
+              className="w-10 h-10 rounded-full flex items-center justify-center font-black text-sm mb-2 overflow-hidden bg-[#AAFF00]"
+              style={{ color: "#0A0F1C" }}
             >
-              {user?.name?.charAt(0).toUpperCase()}
+              {user?.profile_image ? (
+                <img src={`http://localhost:5000${user.profile_image}`} alt="" className="w-full h-full object-cover" />
+              ) : (
+                user?.name?.charAt(0).toUpperCase()
+              )}
             </div>
             <p className="text-white font-bold text-sm truncate">
               {user?.name}
@@ -146,17 +150,21 @@ function DashboardLayout({ children, menuItems }) {
           <div 
             className="flex items-center space-x-3 cursor-pointer hover:opacity-80 transition-all"
             onClick={() => {
-              if (user?.role === "Trekker") navigate("/trekker/dashboard");
-              else if (user?.role === "Guide") navigate("/guide/dashboard");
-              else if (user?.role === "LocalVendor") navigate("/vendor/dashboard");
+              if (user?.role === "Trekker") navigate("/trekker/profile");
+              else if (user?.role === "Guide") navigate("/guide/profile");
+              else if (user?.role === "LocalVendor") navigate("/vendor/profile");
               else if (user?.role === "Admin") navigate("/admin/dashboard");
             }}
           >
             <div
-              className="w-8 h-8 rounded-full flex items-center justify-center font-black text-xs"
-              style={{ backgroundColor: "#AAFF00", color: "#0A0F1C" }}
+              className="w-8 h-8 rounded-full flex items-center justify-center font-black text-xs overflow-hidden bg-[#AAFF00]"
+              style={{ color: "#0A0F1C" }}
             >
-              {user?.name?.charAt(0).toUpperCase()}
+              {user?.profile_image ? (
+                <img src={`http://localhost:5000${user.profile_image}`} alt="" className="w-full h-full object-cover" />
+              ) : (
+                user?.name?.charAt(0).toUpperCase()
+              )}
             </div>
             <span className="text-sm text-white">{user?.name}</span>
           </div>

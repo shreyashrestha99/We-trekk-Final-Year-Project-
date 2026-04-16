@@ -24,7 +24,8 @@ const paymentSchema = new mongoose.Schema({
     type: String,
     default: ""
   },
-  khalti_token: {
+  // Stores eSewa transaction_uuid or Khalti pidx (kept generic for backward compat)
+  gateway_token: {
     type: String,
     default: ""
   }

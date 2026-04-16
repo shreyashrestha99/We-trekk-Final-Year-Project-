@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react";
 import API from "../utils/axios";
+import { useAuth } from "../context/AuthContext";
 
 function EditProfileModal({ isOpen, onClose, profileData, onUpdate }) {
+  const { syncUser } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
     experience_years: 0,
     license_no: "",
     company_name: "",
+    address: "",
   });
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState("");
@@ -24,6 +27,7 @@ function EditProfileModal({ isOpen, onClose, profileData, onUpdate }) {
         experience_years: profileData.guide?.experience_years || 0,
         license_no: profileData.guide?.license_no || profileData.vendor?.license_no || "",
         company_name: profileData.vendor?.company_name || "",
+        address: profileData.trekker?.address || "",
       });
       setPreview(profileData.user?.profile_image || "");
     }
@@ -62,6 +66,7 @@ function EditProfileModal({ isOpen, onClose, profileData, onUpdate }) {
         headers: { "Content-Type": "multipart/form-data" }
       });
 
+      syncUser(res.data.user);
       onUpdate(res.data.user);
       onClose();
     } catch (err) {
@@ -128,11 +133,21 @@ function EditProfileModal({ isOpen, onClose, profileData, onUpdate }) {
               </div>
             )}
 
-            <div className="space-y-1">
-              <label className="text-[0.65rem] font-bold text-gray-500 uppercase">License No.</label>
-              <input type="text" name="license_no" value={formData.license_no} onChange={handleChange}
-                className="w-full bg-[#0A0F1C] border border-gray-800 rounded-lg p-3 text-white text-sm focus:outline-none focus:border-[#AAFF00]" />
-            </div>
+            {role === "Trekker" && (
+              <div className="space-y-1 col-span-2">
+                <label className="text-[0.65rem] font-bold text-gray-500 uppercase">Current Address</label>
+                <input type="text" name="address" value={formData.address} onChange={handleChange}
+                  className="w-full bg-[#0A0F1C] border border-gray-800 rounded-lg p-3 text-white text-sm focus:outline-none focus:border-[#AAFF00]" />
+              </div>
+            )}
+
+            {(role === "Guide" || role === "LocalVendor") && (
+              <div className="space-y-1">
+                <label className="text-[0.65rem] font-bold text-gray-500 uppercase">License No.</label>
+                <input type="text" name="license_no" value={formData.license_no} onChange={handleChange}
+                  className="w-full bg-[#0A0F1C] border border-gray-800 rounded-lg p-3 text-white text-sm focus:outline-none focus:border-[#AAFF00]" />
+              </div>
+            )}
           </div>
 
           <div className="flex gap-4 pt-4">

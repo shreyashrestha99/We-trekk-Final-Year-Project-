@@ -77,8 +77,21 @@ router.put("/verify/:userId", protect, authorize("Admin"), async (req, res) => {
 // Get all disputes
 router.get("/disputes", protect, authorize("Admin"), async (req, res) => {
   try {
-    const disputes = await Booking.find({ dispute_status: { $ne: "None" } }).populate("trekker_id").populate("schedule_id");
-    res.json(disputes);
+    const disputes = await Booking.find({ dispute_status: { $ne: "None" } })
+      .populate("user_id", "name email")
+      .populate({
+        path: "trek_schedule_id",
+        populate: { path: "trek_id", select: "trek_name" }
+      })
+      .populate("ride_id");
+    
+    // Format for frontend
+    const formattedDisputes = disputes.map(d => ({
+      ...d._doc,
+      trekker_id: d.user_id // Alias for frontend consistency if needed, but I'll fix frontend too
+    }));
+
+    res.json(formattedDisputes);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
