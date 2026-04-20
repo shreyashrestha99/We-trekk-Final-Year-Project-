@@ -9,6 +9,30 @@ export const register = async (req, res) => {
   try {
     const { name, email, password, role, address } = req.body;
 
+    // AT-02: Invalid or missing details validation
+    if (!name || !email || !password || !role || !address) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    // Name validation: must start with capital letter
+    if (!/^[A-Z]/.test(name.trim())) {
+      return res.status(400).json({ message: "Name must start with a capital letter" });
+    }
+
+    // Password validation: min 6 chars, uppercase, number, special char
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{6,}$/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({ 
+        message: "Password must be at least 6 characters and contain an uppercase letter, a number, and a special character" 
+      });
+    }
+
+    // Email format validation
+    if (!/^\S+@\S+\.\S+/.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+
+    // AT-03: Duplicate email registration
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
@@ -129,6 +153,12 @@ export const updateProfile = async (req, res) => {
     
     // 1. Update Base User
     const userUpdates = { name, phone };
+
+    // Maintain consistency with AT-02 name validation
+    if (name && !/^[A-Z]/.test(name.trim())) {
+      return res.status(400).json({ message: "Name must start with a capital letter" });
+    }
+
     if (req.file) {
       userUpdates.profile_image = `/uploads/${req.file.filename}`;
     }

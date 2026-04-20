@@ -69,6 +69,11 @@ export const getTrekById = async (req, res) => {
 // POST /api/treks
 export const createTrek = async (req, res) => {
   try {
+    // AT-09: Trek creation as guide restricted
+    if (req.user.role !== "Guide") {
+      return res.status(403).json({ message: "Only Guides can create trek blueprints. Access denied." });
+    }
+
     const trekData = { ...req.body };
     
     // Explicitly cast numeric fields to prevent validation errors with FormData/Multer

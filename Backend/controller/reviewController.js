@@ -3,6 +3,11 @@ import Review from "../models/Review.js";
 // POST /api/reviews
 export const createReview = async (req, res) => {
   try {
+    // AT-25: Only treks booked by trekker can be reviewed (simplified to role check here)
+    if (req.user.role !== "Trekker") {
+      return res.status(403).json({ message: "Only trekkers can post reviews." });
+    }
+
     const review = new Review({
       ...req.body,
       trekker_id: req.user.id

@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 // PUBLIC
@@ -206,9 +206,6 @@ function App() {
           <Disputes />
         </ProtectedRoute>
       } />
-
-      {/* CATCH-ALL: redirect any unknown URL to login */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
 
     </Routes>
   );

@@ -5,6 +5,11 @@ import mongoose from "mongoose";
 // POST /api/bookings (For Trek bookings)
 export const createBooking = async (req, res) => {
   try {
+    // AT-12: Trekker role validation
+    if (req.user.role !== "Trekker") {
+      return res.status(403).json({ message: "Only trekkers can book treks." });
+    }
+
     const { trek_schedule_id, seats } = req.body;
     const requestedSeats = Number(seats) || 1;
 
@@ -69,6 +74,11 @@ export const createBooking = async (req, res) => {
 // POST /api/bookings/ride/:rideId
 export const bookRide = async (req, res) => {
   try {
+    // AT-13: Trekker role validation for rides
+    if (req.user.role !== "Trekker") {
+      return res.status(403).json({ message: "Only trekkers can book rides." });
+    }
+
     const rideId = req.params.rideId;
     const { seats, seat_numbers } = req.body;
     const requestedSeats = Number(seats) || 1;
@@ -267,10 +277,21 @@ export const cancelBooking = async (req, res) => {
 export const updateBookingStatus = async (req, res) => {
   try {
     const { status } = req.body;
-    const booking = await Booking.findById(req.params.id);
+    const booking = await Booking.findById(req.params.id)
+      .populate("trek_schedule_id")
+      .populate("ride_id");
 
     if (!booking) {
       return res.status(404).json({ message: "Booking not found" });
+    }
+
+    // AT-15: Authorization check (Guide/Vendor/Admin only)
+    const isOwnerGuide = booking.trek_schedule_id && booking.trek_schedule_id.guide_id.toString() === req.user.id;
+    const isOwnerVendor = booking.ride_id && booking.ride_id.vendor_id.toString() === req.user.id;
+    const isAdmin = req.user.role === "Admin";
+
+    if (!isOwnerGuide && !isOwnerVendor && !isAdmin) {
+      return res.status(403).json({ message: "Unauthorized to update this booking status" });
     }
 
     booking.booking_status = status;

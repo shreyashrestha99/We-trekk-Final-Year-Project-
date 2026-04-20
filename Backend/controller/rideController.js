@@ -6,6 +6,11 @@ import mongoose from "mongoose";
 // POST /api/rides
 export const createRide = async (req, res) => {
   try {
+    // AT-19: Vendor ride creation restricted
+    if (req.user.role !== "LocalVendor") {
+      return res.status(403).json({ message: "Only Local Vendors can create rides." });
+    }
+
     const { ride_name, pickup_location, drop_location, departure_time, price, total_seats, trek_id } = req.body;
     
     const newRide = new Ride({

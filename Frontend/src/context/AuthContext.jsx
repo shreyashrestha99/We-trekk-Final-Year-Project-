@@ -1,7 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
-export { AuthContext };
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -48,13 +47,12 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("phone", userData.phone || "");
   };
 
-  // Logout function — clears session and forces redirect to login
+  // Logout function
   const logout = () => {
     setUser(null);
     setToken(null);
     setRole(null);
     localStorage.clear();
-    window.location.href = "/login";
   };
 
   return (
