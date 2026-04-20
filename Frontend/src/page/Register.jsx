@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import API from "../utils/axios";
 import Footer from "../components/Footer";
 
 function Register() {
@@ -20,30 +20,47 @@ function Register() {
   const validate = () => {
     const newErrors = {};
 
+    // Name validation: required, min 2 chars, must start with capital letter, letters and spaces only
     if (!name.trim()) {
       newErrors.name = "Full name is required";
     } else if (name.trim().length < 2) {
       newErrors.name = "Name must be at least 2 characters";
+    } else if (!/^[A-Z]/.test(name.trim())) {
+      newErrors.name = "Name must start with a capital letter";
+    } else if (!/^[A-Za-z\s]+$/.test(name.trim())) {
+      newErrors.name = "Name can only contain letters and spaces";
     }
 
+    // Email validation: required, must follow valid format
     if (!email.trim()) {
       newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = "Enter a valid email address";
+    } else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+      newErrors.email = "Enter a valid email address (e.g. user@example.com)";
     }
 
+    // Password validation: required, min 6 chars, must contain uppercase, number, and special character
     if (!password) {
       newErrors.password = "Password is required";
     } else if (password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
+    } else if (!/[A-Z]/.test(password)) {
+      newErrors.password = "Password must contain at least one capital letter";
+    } else if (!/[0-9]/.test(password)) {
+      newErrors.password = "Password must contain at least one number";
+    } else if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+      newErrors.password = "Password must contain at least one special character (!@#$%...)";
     }
 
+    // Role validation: must be selected
     if (!role) {
       newErrors.role = "Please select a role";
     }
 
+    // Address validation: required, min 3 chars
     if (!address.trim()) {
       newErrors.address = "Address is required";
+    } else if (address.trim().length < 3) {
+      newErrors.address = "Address must be at least 3 characters";
     }
 
     return newErrors;
@@ -62,8 +79,8 @@ function Register() {
     setLoading(true);
 
     try {
-      await axios.post(
-        "http://localhost:5000/api/auth/register",
+      await API.post(
+        "/api/auth/register",
         { name, email, password, role, address }
       );
 
